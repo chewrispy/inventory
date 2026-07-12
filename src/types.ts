@@ -52,7 +52,15 @@ export interface InventoryItem {
   memo?: string;
 }
 
-export interface CartEntry {
+/** an item marked to sell/declutter on 당근마켓 */
+export interface SellEntry {
+  itemId: string;
+  qty: number;
+  addedAt: string;
+}
+
+/** an item that ran out and needs to be repurchased (쿠팡/이마트/코스트코 etc.) */
+export interface ShoppingEntry {
   itemId: string;
   qty: number;
   addedAt: string;

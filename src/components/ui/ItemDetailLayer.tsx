@@ -10,10 +10,11 @@ export default function ItemDetailLayer() {
   const selectItem = useInventoryStore((s) => s.selectItem);
   const updateItem = useInventoryStore((s) => s.updateItem);
   const removeItem = useInventoryStore((s) => s.removeItem);
-  const addToCart = useInventoryStore((s) => s.addToCart);
+  const addToShoppingList = useInventoryStore((s) => s.addToShoppingList);
+  const addToSellBin = useInventoryStore((s) => s.addToSellBin);
 
   const [showDaangn, setShowDaangn] = useState(false);
-  const [justAdded, setJustAdded] = useState(false);
+  const [justAddedShopping, setJustAddedShopping] = useState(false);
 
   const item = useMemo(
     () => items.find((it) => it.id === selectedItemId) ?? null,
@@ -24,10 +25,15 @@ export default function ItemDetailLayer() {
 
   const room = rooms.find((r) => r.id === item.roomId);
 
-  const handleAddToCart = () => {
-    addToCart(item.id, 1);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1200);
+  const handleAddToShoppingList = () => {
+    addToShoppingList(item.id, 1);
+    setJustAddedShopping(true);
+    setTimeout(() => setJustAddedShopping(false), 1200);
+  };
+
+  const handleSellOnDaangn = () => {
+    addToSellBin(item.id, item.quantity);
+    setShowDaangn(true);
   };
 
   return (
@@ -88,11 +94,11 @@ export default function ItemDetailLayer() {
         </div>
 
         <div className="detail-actions">
-          <button className="pixel-btn" onClick={handleAddToCart}>
-            {justAdded ? '담았어요! ✅' : '🛒 장바구니 담기'}
+          <button className="pixel-btn" onClick={handleAddToShoppingList}>
+            {justAddedShopping ? '담았어요! ✅' : '🛒 다시 구매하기'}
           </button>
-          <button className="pixel-btn pixel-btn-accent" onClick={() => setShowDaangn(true)}>
-            🥕 당근마켓에 올리기
+          <button className="pixel-btn pixel-btn-carrot" onClick={handleSellOnDaangn}>
+            🥕 당근에 내놓기
           </button>
           <button
             className="pixel-btn pixel-btn-danger"

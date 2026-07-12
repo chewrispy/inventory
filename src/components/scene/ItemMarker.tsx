@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Billboard, Html } from '@react-three/drei';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { InventoryItem, RoomDef } from '../../types';
-import { createIconTexture } from '../../utils/iconTexture';
+import { createIconTexture, createSoftShadowTexture } from '../../utils/iconTexture';
 import { useInventoryStore } from '../../store/useInventoryStore';
 
 interface Props {
@@ -15,6 +15,7 @@ const MARGIN = 0.16;
 export default function ItemMarker({ item, room }: Props) {
   const [hovered, setHovered] = useState(false);
   const texture = useMemo(() => createIconTexture(item.emoji), [item.emoji]);
+  const shadowTexture = useMemo(() => createSoftShadowTexture(), []);
   const selectItem = useInventoryStore((s) => s.selectItem);
   const selectedItemId = useInventoryStore((s) => s.selectedItemId);
   const isSelected = selectedItemId === item.id;
@@ -43,10 +44,10 @@ export default function ItemMarker({ item, room }: Props) {
         document.body.style.cursor = 'auto';
       }}
     >
-      {/* shadow disc */}
+      {/* soft contact shadow */}
       <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.32, 12]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.18} />
+        <planeGeometry args={[0.7, 0.7]} />
+        <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
       </mesh>
 
       <Billboard position={[0, hovered || isSelected ? 0.62 : 0.5, 0]}>

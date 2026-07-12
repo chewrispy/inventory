@@ -37,7 +37,7 @@ export default function DraftModal({ title, note, initialText, onClose }: Props)
             {copied ? '복사 완료! ✅' : '📋 글 복사하기'}
           </button>
           <a
-            className="pixel-btn pixel-btn-accent"
+            className="pixel-btn pixel-btn-carrot"
             href={DAANGN_URL}
             target="_blank"
             rel="noreferrer"

@@ -118,6 +118,14 @@ export default function FloorPlanEditor() {
 
   const handleImageUpload = (file: File | undefined) => {
     if (!file) return;
+    if (
+      draftRooms.length > 0 &&
+      confirm(
+        '도면 이미지를 기준으로 방을 새로 그릴까요?\n지금 그려진 방들을 지우고 이미지 위에 다시 그릴게요. (취소하면 기존 방을 유지한 채 이미지만 참고용으로 깔아요)',
+      )
+    ) {
+      setDraftRooms([]);
+    }
     const reader = new FileReader();
     reader.onload = () => setImageUrl(reader.result as string);
     reader.readAsDataURL(file);

@@ -1,11 +1,12 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { EffectComposer, Pixelation } from '@react-three/postprocessing';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { houseBounds } from '../../data/rooms';
 import { useInventoryStore } from '../../store/useInventoryStore';
 import RoomFloor from './RoomFloor';
 import ItemMarker from './ItemMarker';
+import PuffCloud from './PuffCloud';
 
 function Ground({ bounds, onClick }: { bounds: ReturnType<typeof houseBounds>; onClick: () => void }) {
   return (
@@ -15,9 +16,21 @@ function Ground({ bounds, onClick }: { bounds: ReturnType<typeof houseBounds>; o
       receiveShadow
       onClick={onClick}
     >
-      <planeGeometry args={[bounds.width + 16, bounds.depth + 16]} />
-      <meshStandardMaterial color="#8fd18a" flatShading />
+      <planeGeometry args={[bounds.width + 20, bounds.depth + 20]} />
+      <meshStandardMaterial color="#a3e896" />
     </mesh>
+  );
+}
+
+function Sky({ bounds }: { bounds: ReturnType<typeof houseBounds> }) {
+  return (
+    <group>
+      <PuffCloud position={[bounds.centerX - bounds.width * 0.8, 9, bounds.centerZ - 8]} scale={1.4} />
+      <PuffCloud
+        position={[bounds.centerX + bounds.width * 0.9, 10.5, bounds.centerZ + bounds.depth * 0.5]}
+        scale={1.1}
+      />
+    </group>
   );
 }
 
@@ -36,17 +49,20 @@ export default function HouseScene() {
       camera={{ position: [bounds.centerX + bounds.width * 0.9 + 3, 9, bounds.centerZ + bounds.depth * 0.9 + 3], fov: 40 }}
       onPointerMissed={() => selectItem(null)}
     >
-      <color attach="background" args={['#bfe9ff']} />
-      <fog attach="fog" args={['#bfe9ff', 22, 46]} />
-      <ambientLight intensity={0.85} />
+      <color attach="background" args={['#8fd0ff']} />
+      <fog attach="fog" args={['#bfe6ff', 26, 50]} />
+      <hemisphereLight args={['#fff6d6', '#8fd0ff', 0.9]} />
+      <ambientLight intensity={0.55} />
       <directionalLight
         position={[bounds.centerX + 8, 14, bounds.centerZ + 6]}
-        intensity={0.9}
+        intensity={1.15}
+        color="#fff6e0"
         castShadow
-        shadow-mapSize={[512, 512]}
+        shadow-mapSize={[1024, 1024]}
       />
 
       <Suspense fallback={null}>
+        <Sky bounds={bounds} />
         <Ground bounds={bounds} onClick={() => selectItem(null)} />
         {rooms.map((room) => (
           <RoomFloor key={room.id} room={room} />
@@ -70,7 +86,7 @@ export default function HouseScene() {
       />
 
       <EffectComposer>
-        <Pixelation granularity={4} />
+        <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} intensity={0.35} mipmapBlur />
       </EffectComposer>
     </Canvas>
   );
