@@ -508,6 +508,135 @@ textarea {
   border-radius: 5px;
 }
 
+/* ---------- Floor plan editor ---------- */
+.floorplan-panel {
+  width: min(940px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.floorplan-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.floorplan-upload {
+  cursor: pointer;
+}
+
+.floorplan-opacity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.floorplan-count {
+  margin-left: auto;
+  font-size: 11px;
+  background: var(--sky);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.floorplan-stage {
+  position: relative;
+  max-width: 100%;
+  overflow: auto;
+  border: 3px solid var(--border);
+  border-radius: 6px;
+  background-color: #eef7ff;
+  background-image:
+    linear-gradient(rgba(75, 63, 114, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(75, 63, 114, 0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
+  cursor: crosshair;
+  user-select: none;
+}
+
+.floorplan-bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.floorplan-room {
+  position: absolute;
+  border: 3px solid;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 4px 6px;
+  cursor: default;
+}
+
+.floorplan-room-name {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 3px;
+  padding: 2px 5px;
+}
+
+.floorplan-room-delete {
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid var(--border);
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.floorplan-preview-rect {
+  position: absolute;
+  border: 3px dashed var(--accent-dark);
+  background: rgba(255, 159, 90, 0.2);
+  pointer-events: none;
+}
+
+.floorplan-naming-popup {
+  position: absolute;
+  width: 200px;
+  background: var(--cream);
+  border: 3px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.floorplan-color-picker {
+  grid-template-columns: repeat(8, 1fr);
+  margin-bottom: 0;
+}
+
+.floorplan-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.floorplan-swatch-active {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
 @media (max-width: 640px) {
   .topbar-title {
     font-size: 12px;

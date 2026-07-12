@@ -28,8 +28,11 @@ export type Condition = '새상품' | '거의새것' | '사용감있음' | '많�
 export interface RoomDef {
   id: string;
   name: string;
-  gridX: number;
-  gridZ: number;
+  /** world-space footprint, min corner + size (free-form, not grid-locked) */
+  x: number;
+  z: number;
+  width: number;
+  depth: number;
   floorColor: string;
   accentColor: string;
 }

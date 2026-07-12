@@ -3,6 +3,7 @@ import TopBar from './components/ui/TopBar';
 import ItemDetailLayer from './components/ui/ItemDetailLayer';
 import CartDrawer from './components/ui/CartDrawer';
 import AddItemModal from './components/ui/AddItemModal';
+import FloorPlanEditor from './components/ui/FloorPlanEditor';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <ItemDetailLayer />
       <CartDrawer />
       <AddItemModal />
+      <FloorPlanEditor />
     </div>
   );
 }

@@ -1,21 +1,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
-import type { CartEntry, InventoryItem } from '../types';
+import type { CartEntry, InventoryItem, RoomDef } from '../types';
 import { SEED_ITEMS } from '../data/seedItems';
+import { DEFAULT_ROOMS } from '../data/rooms';
 
 interface InventoryState {
+  rooms: RoomDef[];
   items: InventoryItem[];
   cart: CartEntry[];
   selectedItemId: string | null;
   isCartOpen: boolean;
   isAddModalOpen: boolean;
+  isFloorPlanEditorOpen: boolean;
 
   selectItem: (id: string | null) => void;
   openCart: () => void;
   closeCart: () => void;
   openAddModal: () => void;
   closeAddModal: () => void;
+  openFloorPlanEditor: () => void;
+  closeFloorPlanEditor: () => void;
+
+  setRooms: (rooms: RoomDef[]) => void;
 
   addItem: (item: Omit<InventoryItem, 'id'>) => void;
   updateItem: (id: string, patch: Partial<InventoryItem>) => void;
@@ -30,17 +37,23 @@ interface InventoryState {
 export const useInventoryStore = create<InventoryState>()(
   persist(
     (set, get) => ({
+      rooms: DEFAULT_ROOMS,
       items: SEED_ITEMS,
       cart: [],
       selectedItemId: null,
       isCartOpen: false,
       isAddModalOpen: false,
+      isFloorPlanEditorOpen: false,
 
       selectItem: (id) => set({ selectedItemId: id }),
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
       openAddModal: () => set({ isAddModalOpen: true }),
       closeAddModal: () => set({ isAddModalOpen: false }),
+      openFloorPlanEditor: () => set({ isFloorPlanEditorOpen: true }),
+      closeFloorPlanEditor: () => set({ isFloorPlanEditorOpen: false }),
+
+      setRooms: (rooms) => set({ rooms }),
 
       addItem: (item) =>
         set((state) => ({ items: [...state.items, { ...item, id: nanoid(8) }] })),
@@ -84,7 +97,7 @@ export const useInventoryStore = create<InventoryState>()(
     }),
     {
       name: 'pixel-home-inventory',
-      partialize: (state) => ({ items: state.items, cart: state.cart }),
+      partialize: (state) => ({ items: state.items, cart: state.cart, rooms: state.rooms }),
     },
   ),
 );

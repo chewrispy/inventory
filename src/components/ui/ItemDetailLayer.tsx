@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useInventoryStore } from '../../store/useInventoryStore';
 import { CATEGORY_LABEL } from '../../types';
-import { ROOMS } from '../../data/rooms';
 import DaangnModal from './DaangnModal';
 
 export default function ItemDetailLayer() {
   const selectedItemId = useInventoryStore((s) => s.selectedItemId);
   const items = useInventoryStore((s) => s.items);
+  const rooms = useInventoryStore((s) => s.rooms);
   const selectItem = useInventoryStore((s) => s.selectItem);
   const updateItem = useInventoryStore((s) => s.updateItem);
   const removeItem = useInventoryStore((s) => s.removeItem);
@@ -22,7 +22,7 @@ export default function ItemDetailLayer() {
 
   if (!item) return null;
 
-  const room = ROOMS.find((r) => r.id === item.roomId);
+  const room = rooms.find((r) => r.id === item.roomId);
 
   const handleAddToCart = () => {
     addToCart(item.id, 1);

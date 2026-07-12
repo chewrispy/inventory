@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Billboard, Html } from '@react-three/drei';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { InventoryItem, RoomDef } from '../../types';
-import { ROOM_SIZE, roomOrigin } from '../../data/rooms';
 import { createIconTexture } from '../../utils/iconTexture';
 import { useInventoryStore } from '../../store/useInventoryStore';
 
@@ -20,11 +19,10 @@ export default function ItemMarker({ item, room }: Props) {
   const selectedItemId = useInventoryStore((s) => s.selectedItemId);
   const isSelected = selectedItemId === item.id;
 
-  const origin = roomOrigin(room);
   const fx = MARGIN + item.position.x * (1 - MARGIN * 2);
   const fz = MARGIN + item.position.z * (1 - MARGIN * 2);
-  const x = origin.x + fx * ROOM_SIZE;
-  const z = origin.z + fz * ROOM_SIZE;
+  const x = room.x + fx * room.width;
+  const z = room.z + fz * room.depth;
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
