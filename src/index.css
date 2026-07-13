@@ -180,6 +180,11 @@ a {
   transform: translateY(0);
   box-shadow: 0 3px 8px -2px rgba(74, 63, 92, 0.25);
 }
+.pixel-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
 .pixel-btn-sm {
   padding: 7px 12px;
   font-size: 12px;
@@ -695,6 +700,7 @@ a {
   justify-content: space-between;
   padding: 6px 8px;
   cursor: default;
+  touch-action: none;
 }
 
 .floorplan-room-name {

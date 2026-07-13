@@ -1,14 +1,24 @@
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { houseBounds } from '../../data/rooms';
 import { useInventoryStore } from '../../store/useInventoryStore';
+import { createGroundTexture } from '../../utils/iconTexture';
 import RoomFloor from './RoomFloor';
 import ItemMarker from './ItemMarker';
 import PuffCloud from './PuffCloud';
 
 function Ground({ bounds, onClick }: { bounds: ReturnType<typeof houseBounds>; onClick: () => void }) {
+  const width = bounds.width + 20;
+  const depth = bounds.depth + 20;
+  const texture = useMemo(() => {
+    const t = createGroundTexture().clone();
+    t.repeat.set(width / 6, depth / 6);
+    t.needsUpdate = true;
+    return t;
+  }, [width, depth]);
+
   return (
     <mesh
       position={[bounds.centerX, -0.05, bounds.centerZ]}
@@ -16,8 +26,8 @@ function Ground({ bounds, onClick }: { bounds: ReturnType<typeof houseBounds>; o
       receiveShadow
       onClick={onClick}
     >
-      <planeGeometry args={[bounds.width + 20, bounds.depth + 20]} />
-      <meshStandardMaterial color="#a3e896" />
+      <planeGeometry args={[width, depth]} />
+      <meshStandardMaterial map={texture} roughness={0.85} />
     </mesh>
   );
 }

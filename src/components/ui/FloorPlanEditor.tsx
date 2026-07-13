@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { useInventoryStore } from '../../store/useInventoryStore';
 import { DEFAULT_ROOMS } from '../../data/rooms';
 import { darken, ROOM_COLOR_PRESETS } from '../../utils/color';
+import { detectRoomsFromImage } from '../../utils/floorPlanDetect';
 import type { RoomDef } from '../../types';
 
 const PX_PER_UNIT = 40;
@@ -76,26 +77,33 @@ export default function FloorPlanEditor() {
   );
   const [pendingName, setPendingName] = useState('');
   const [pendingColor, setPendingColor] = useState(ROOM_COLOR_PRESETS[0]);
+  const [isDetecting, setIsDetecting] = useState(false);
 
   if (!isOpen) return null;
 
-  const getStagePoint = (e: React.MouseEvent): Point => {
+  const getStagePoint = (e: React.PointerEvent): Point => {
     const rect = stageRef.current!.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
 
-  const handleStageMouseDown = (e: React.MouseEvent) => {
+  const handleStagePointerDown = (e: React.PointerEvent) => {
     if (pendingRect) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // some browsers/synthetic pointers don't support capture; dragging still works without it
+    }
     setDragStart(getStagePoint(e));
     setDragCurrent(getStagePoint(e));
   };
 
-  const handleStageMouseMove = (e: React.MouseEvent) => {
+  const handleStagePointerMove = (e: React.PointerEvent) => {
     if (!dragStart) return;
+    e.preventDefault();
     setDragCurrent(getStagePoint(e));
   };
 
-  const handleStageMouseUp = () => {
+  const handleStagePointerUp = () => {
     if (!dragStart || !dragCurrent) return;
     const rect = normalizeRect(dragStart, dragCurrent);
     setDragStart(null);
@@ -131,6 +139,50 @@ export default function FloorPlanEditor() {
     reader.readAsDataURL(file);
   };
 
+  const handleAutoDetect = async () => {
+    if (!imageUrl) return;
+    setIsDetecting(true);
+    try {
+      const { rects, canvasWidth, canvasHeight, naturalWidth, naturalHeight } =
+        await detectRoomsFromImage(imageUrl);
+
+      const containScale = Math.min(STAGE_W / naturalWidth, STAGE_H / naturalHeight);
+      const drawnW = naturalWidth * containScale;
+      const drawnH = naturalHeight * containScale;
+      const offsetX = (STAGE_W - drawnW) / 2;
+      const offsetY = (STAGE_H - drawnH) / 2;
+      const toNatural = naturalWidth / canvasWidth || naturalHeight / canvasHeight;
+      const totalScale = containScale * toNatural;
+
+      const detected: DraftRoom[] = rects
+        .map((r, i) => ({
+          id: nanoid(6),
+          name: `공간 ${i + 1}`,
+          color: ROOM_COLOR_PRESETS[i % ROOM_COLOR_PRESETS.length],
+          x: offsetX + r.x * totalScale,
+          y: offsetY + r.y * totalScale,
+          w: r.w * totalScale,
+          h: r.h * totalScale,
+        }))
+        .filter((r) => r.w >= MIN_RECT && r.h >= MIN_RECT);
+
+      if (detected.length === 0) {
+        alert(
+          '방을 인식하지 못했어요. 가구가 그려진 3D 렌더링 도면은 인식이 어려워요. 위/아래에서 직접 방을 그려주세요!',
+        );
+        return;
+      }
+      if (
+        draftRooms.length === 0 ||
+        confirm(`${detected.length}개의 공간을 찾았어요! 지금 그려진 방들을 자동 인식 결과로 바꿀까요?`)
+      ) {
+        setDraftRooms(detected);
+      }
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
   const handleSave = () => {
     if (draftRooms.length === 0) {
       alert('방을 최소 1개는 그려주세요!');
@@ -155,8 +207,11 @@ export default function FloorPlanEditor() {
         </button>
         <h3 className="modal-title">🏗️ 우리집 도면 만들기</h3>
         <p className="modal-note">
-          네이버 부동산 · Zillow 등에서 찾은 도면을 스크린샷으로 저장해 업로드하면 배경에 깔아드려요.
-          그 위에 마우스로 드래그해서 방 모양을 따라 그려보세요. 이미지 없이 바로 그려도 괜찮아요!
+          네이버 부동산 · Zillow 등에서 찾은 도면을 스크린샷으로 저장해 업로드하면 배경에 깔아드려요
+          (도면 부분만 크롭해서 올리면 더 깔끔해요). "자동으로 방 나눠보기"는 벽이 굵고 또렷한 흑백 2D
+          도면에서만 잘 작동하고, 네이버·Zillow에서 흔히 보이는 가구가 채워진 3D 렌더링 도면은 벽 선이
+          가늘고 색이 옅어서 거의 인식이 안 돼요 — 이런 경우엔 아래에서 손가락/마우스로 직접 드래그해서
+          방을 그려주세요. 인식 결과든 직접 그린 것이든 위치·크기는 자유롭게 다듬을 수 있어요.
         </p>
 
         <div className="floorplan-toolbar">
@@ -171,6 +226,14 @@ export default function FloorPlanEditor() {
           </label>
           {imageUrl && (
             <>
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-sm pixel-btn-carrot"
+                onClick={handleAutoDetect}
+                disabled={isDetecting}
+              >
+                {isDetecting ? '인식 중...' : '✨ 자동으로 방 나눠보기'}
+              </button>
               <button
                 type="button"
                 className="pixel-btn pixel-btn-sm"
@@ -197,11 +260,11 @@ export default function FloorPlanEditor() {
         <div
           ref={stageRef}
           className="floorplan-stage"
-          style={{ width: STAGE_W, height: STAGE_H }}
-          onMouseDown={handleStageMouseDown}
-          onMouseMove={handleStageMouseMove}
-          onMouseUp={handleStageMouseUp}
-          onMouseLeave={() => {
+          style={{ width: STAGE_W, height: STAGE_H, touchAction: 'none' }}
+          onPointerDown={handleStagePointerDown}
+          onPointerMove={handleStagePointerMove}
+          onPointerUp={handleStagePointerUp}
+          onPointerCancel={() => {
             setDragStart(null);
             setDragCurrent(null);
           }}
@@ -228,7 +291,7 @@ export default function FloorPlanEditor() {
                 background: `${room.color}cc`,
                 borderColor: darken(room.color),
               }}
-              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
             >
               <span className="floorplan-room-name">{room.name}</span>
               <button
@@ -255,7 +318,7 @@ export default function FloorPlanEditor() {
                 left: Math.min(pendingRect.x, STAGE_W - 220),
                 top: Math.min(pendingRect.y + pendingRect.h + 8, STAGE_H - 150),
               }}
-              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
             >
               <input
                 className="form-input"
