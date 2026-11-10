@@ -1,47 +1,51 @@
 import { useInventoryStore } from '../../store/useInventoryStore';
 
 export default function TopBar() {
-  const sellBin = useInventoryStore((s) => s.sellBin);
-  const shoppingList = useInventoryStore((s) => s.shoppingList);
-  const openSellBin = useInventoryStore((s) => s.openSellBin);
-  const openShoppingList = useInventoryStore((s) => s.openShoppingList);
-  const closeSellBin = useInventoryStore((s) => s.closeSellBin);
-  const closeShoppingList = useInventoryStore((s) => s.closeShoppingList);
-  const openAddModal = useInventoryStore((s) => s.openAddModal);
-  const openFloorPlanEditor = useInventoryStore((s) => s.openFloorPlanEditor);
-  const sellCount = sellBin.reduce((sum, c) => sum + c.qty, 0);
-  const shoppingCount = shoppingList.length;
+  const view = useInventoryStore((s) => s.view);
+  const setView = useInventoryStore((s) => s.setView);
+  const planMode = useInventoryStore((s) => s.planMode);
+  const setPlanMode = useInventoryStore((s) => s.setPlanMode);
+  const lowWalls = useInventoryStore((s) => s.lowWalls);
+  const toggleLowWalls = useInventoryStore((s) => s.toggleLowWalls);
+
+  if (planMode === 'edit') {
+    return (
+      <div className="topbar">
+        <div className="topbar-title">🏗️ 도면 편집</div>
+        <button className="pixel-btn pixel-btn-sm pixel-btn-accent" onClick={() => setPlanMode('arrange')}>
+          완료
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="topbar">
       <div className="topbar-title">🏠 우리집 인벤토리</div>
-      <div className="topbar-actions">
-        <button className="pixel-btn pixel-btn-sm" onClick={openFloorPlanEditor}>
-          🏗️ 집 구조
-        </button>
-        <button className="pixel-btn pixel-btn-sm" onClick={openAddModal}>
-          + 물건 추가
-        </button>
-        <button
-          className="pixel-btn pixel-btn-sm pixel-btn-badge"
-          onClick={() => {
-            closeSellBin();
-            openShoppingList();
-          }}
-        >
-          🛒 장바구니
-          {shoppingCount > 0 && <span className="cart-count">{shoppingCount}</span>}
-        </button>
-        <button
-          className="pixel-btn pixel-btn-sm pixel-btn-badge"
-          onClick={() => {
-            closeShoppingList();
-            openSellBin();
-          }}
-        >
-          🥕 판매함
-          {sellCount > 0 && <span className="cart-count">{sellCount}</span>}
-        </button>
+      <div className="topbar-right">
+        {view === '3d' && (
+          <button className="pixel-btn pixel-btn-sm" onClick={toggleLowWalls}>
+            {lowWalls ? '벽 올리기' : '벽 낮추기'}
+          </button>
+        )}
+        <div className="segmented" role="tablist">
+          <button
+            role="tab"
+            aria-selected={view === '2d'}
+            className={view === '2d' ? 'active' : ''}
+            onClick={() => setView('2d')}
+          >
+            평면
+          </button>
+          <button
+            role="tab"
+            aria-selected={view === '3d'}
+            className={view === '3d' ? 'active' : ''}
+            onClick={() => setView('3d')}
+          >
+            3D
+          </button>
+        </div>
       </div>
     </div>
   );

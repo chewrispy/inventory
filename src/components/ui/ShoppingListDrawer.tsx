@@ -11,7 +11,7 @@ export default function ShoppingListDrawer() {
   const removeFromShoppingList = useInventoryStore((s) => s.removeFromShoppingList);
   const markPurchased = useInventoryStore((s) => s.markPurchased);
   const clearShoppingList = useInventoryStore((s) => s.clearShoppingList);
-  const selectItem = useInventoryStore((s) => s.selectItem);
+  const openDetail = useInventoryStore((s) => s.openDetail);
 
   const entries = useMemo(
     () =>
@@ -45,10 +45,10 @@ export default function ShoppingListDrawer() {
             {entries.map(({ item, qty }) => (
               <div className="drawer-row shopping-row" key={item.id}>
                 <div className="shopping-top">
-                  <span className="drawer-emoji" onClick={() => { selectItem(item.id); close(); }}>
+                  <span className="drawer-emoji" onClick={() => { openDetail(item.id); }}>
                     {item.emoji}
                   </span>
-                  <span className="drawer-name" onClick={() => { selectItem(item.id); close(); }}>
+                  <span className="drawer-name" onClick={() => { openDetail(item.id); }}>
                     {item.name}
                   </span>
                   <button

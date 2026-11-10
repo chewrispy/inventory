@@ -3,105 +3,65 @@ import { useInventoryStore } from '../../store/useInventoryStore';
 import { CATEGORY_LABEL, type Category, type Condition } from '../../types';
 
 const EMOJI_CHOICES = [
-  '📦', '🛋️', '🛏️', '📺', '🧊', '🍲', '🍚', '📚', '🧥', '🧻',
-  '🌀', '🪴', '🎮', '👕', '👟', '🧸', '💻', '⚽', '🍷', '🔧',
+  '📦', '🍚', '🥛', '🍲', '🧻', '🧴', '🪥', '🧥', '👕', '👟',
+  '📚', '🧸', '🎮', '💻', '🔧', '🍷', '☕', '🧹', '💊', '🔋',
 ];
 
 const CONDITIONS: Condition[] = ['새상품', '거의새것', '사용감있음', '많이사용함'];
 
+/** 작은 물건(소모품·옷·책 등)을 방이나 가구 안에 등록 */
 export default function AddItemModal() {
-  const isOpen = useInventoryStore((s) => s.isAddModalOpen);
-  const close = useInventoryStore((s) => s.closeAddModal);
+  const defaultLocation = useInventoryStore((s) => s.addStuffLocation);
+  const close = useInventoryStore((s) => s.closeAddStuff);
   const addItem = useInventoryStore((s) => s.addItem);
   const rooms = useInventoryStore((s) => s.rooms);
-  const openFloorPlanEditor = useInventoryStore((s) => s.openFloorPlanEditor);
+  const items = useInventoryStore((s) => s.items);
+  const containers = items.filter((it) => it.placement);
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<Category>('misc');
-  const [roomId, setRoomId] = useState(rooms[0]?.id ?? '');
+  const [locationId, setLocationId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState('');
   const [condition, setCondition] = useState<Condition>('사용감있음');
   const [memo, setMemo] = useState('');
   const [emoji, setEmoji] = useState(EMOJI_CHOICES[0]);
 
+  const isOpen = defaultLocation !== null;
   useEffect(() => {
-    if (isOpen && !rooms.some((r) => r.id === roomId)) {
-      setRoomId(rooms[0]?.id ?? '');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, rooms]);
+    if (isOpen) setLocationId(defaultLocation ?? '');
+  }, [isOpen, defaultLocation]);
 
   if (!isOpen) return null;
 
-  const reset = () => {
-    setName('');
-    setCategory('misc');
-    setRoomId(rooms[0]?.id ?? '');
-    setQuantity(1);
-    setPrice('');
-    setCondition('사용감있음');
-    setMemo('');
-    setEmoji(EMOJI_CHOICES[0]);
-  };
-
-  if (rooms.length === 0) {
-    return (
-      <div className="modal-backdrop" onClick={close}>
-        <div className="pixel-panel modal-panel" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="detail-close" onClick={close}>
-            ✕
-          </button>
-          <h3 className="modal-title">📦 새 물건 추가</h3>
-          <p className="modal-note">
-            아직 만들어진 방이 없어요. 먼저 집 구조를 만들어야 물건을 놓을 수 있어요!
-          </p>
-          <div className="modal-actions">
-            <button
-              type="button"
-              className="pixel-btn pixel-btn-accent"
-              onClick={() => {
-                close();
-                openFloorPlanEditor();
-              }}
-            >
-              🏗️ 집 구조 만들기
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !roomId) return;
+    if (!name.trim()) return;
     addItem({
       name: name.trim(),
       category,
-      roomId,
-      position: { x: 0.2 + Math.random() * 0.6, z: 0.2 + Math.random() * 0.6 },
       quantity,
       emoji,
       price: price ? Number(price) : undefined,
       condition,
       memo: memo.trim() || undefined,
+      locationId: locationId || undefined,
     });
-    reset();
+    setName('');
+    setQuantity(1);
+    setPrice('');
+    setMemo('');
     close();
   };
 
   return (
     <div className="modal-backdrop" onClick={close}>
-      <form
-        className="pixel-panel modal-panel"
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-      >
+      <form className="pixel-panel modal-panel" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
         <button type="button" className="detail-close" onClick={close}>
           ✕
         </button>
-        <h3 className="modal-title">📦 새 물건 추가</h3>
+        <h3 className="modal-title">📦 물건 추가</h3>
+        <p className="modal-note">소모품·옷·책처럼 작은 물건은 방이나 가구 안에 넣어둬요.</p>
 
         <label className="form-label">
           이름
@@ -109,8 +69,9 @@ export default function AddItemModal() {
             className="form-input"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="예: 에어프라이어"
+            placeholder="예: 키친타월"
             required
+            autoFocus
           />
         </label>
 
@@ -127,14 +88,31 @@ export default function AddItemModal() {
           ))}
         </div>
 
+        <label className="form-label">
+          어디에 있나요?
+          <select className="form-input" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
+            <option value="">위치 미정</option>
+            <optgroup label="방">
+              {rooms.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="가구·가전 안">
+              {containers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.emoji} {c.name}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+        </label>
+
         <div className="form-grid">
           <label className="form-label">
             카테고리
-            <select
-              className="form-input"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
-            >
+            <select className="form-input" value={category} onChange={(e) => setCategory(e.target.value as Category)}>
               {Object.entries(CATEGORY_LABEL).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
@@ -142,18 +120,6 @@ export default function AddItemModal() {
               ))}
             </select>
           </label>
-
-          <label className="form-label">
-            방
-            <select className="form-input" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
           <label className="form-label">
             수량
             <input
@@ -164,7 +130,6 @@ export default function AddItemModal() {
               onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
             />
           </label>
-
           <label className="form-label">
             상태
             <select
@@ -179,7 +144,6 @@ export default function AddItemModal() {
               ))}
             </select>
           </label>
-
           <label className="form-label">
             가격 (선택)
             <input

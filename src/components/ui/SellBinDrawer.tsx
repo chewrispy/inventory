@@ -11,7 +11,7 @@ export default function SellBinDrawer() {
   const updateSellBinQty = useInventoryStore((s) => s.updateSellBinQty);
   const removeFromSellBin = useInventoryStore((s) => s.removeFromSellBin);
   const clearSellBin = useInventoryStore((s) => s.clearSellBin);
-  const selectItem = useInventoryStore((s) => s.selectItem);
+  const openDetail = useInventoryStore((s) => s.openDetail);
 
   const [showBulkDraft, setShowBulkDraft] = useState(false);
 
@@ -49,8 +49,7 @@ export default function SellBinDrawer() {
                 className="drawer-row"
                 key={item.id}
                 onClick={() => {
-                  selectItem(item.id);
-                  close();
+                  openDetail(item.id);
                 }}
               >
                 <span className="drawer-emoji">{item.emoji}</span>
