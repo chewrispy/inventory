@@ -35,8 +35,14 @@ function cleanTitle(t: string) {
 
 export async function fetchProductInfo(url: string): Promise<ProductInfo> {
   if (looksLikeImageUrl(url)) return { imageUrl: url };
+  // 처음 보는 페이지는 응답이 느릴 때가 있어서 한 번 더 시도
+  const first = await fetchOnce(url);
+  return first.imageUrl || first.title ? first : fetchOnce(url);
+}
+
+async function fetchOnce(url: string): Promise<ProductInfo> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 20000);
+  const timer = setTimeout(() => ctrl.abort(), 30000);
   try {
     const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`, { signal: ctrl.signal });
     const json = (await res.json()) as {
