@@ -28,9 +28,35 @@ export function looksLikeImageUrl(url: string) {
   return IMAGE_EXT.test(url) || /\/(images?|img|goods_img)\//i.test(url);
 }
 
-function cleanTitle(t: string) {
-  // "상품명 - 사이즈 & 후기 | 무신사", "상품명 | UNIQLO KR" → "상품명"
-  return t.split(/\s[|｜]\s/)[0].split(/\s-\s(사이즈|구매|후기)/)[0].trim();
+function cleanTitle(t: string, publisher?: string) {
+  // "상품명 - 사이즈 & 후기 | 무신사", "상품명 | UNIQLO KR", "상품명 - The Harvard Shop" → "상품명"
+  let out = t.split(/\s[|｜]\s/)[0].split(/\s-\s(사이즈|구매|후기)/)[0].trim();
+  const parts = out.split(/\s[-–—]\s/);
+  const last = parts[parts.length - 1];
+  if (parts.length > 1 && (last === publisher || /shop|store|official|몰|스토어|공식/i.test(last))) {
+    out = parts.slice(0, -1).join(' - ');
+  }
+  return out.trim();
+}
+
+/** 상품명에 들어 있으면 쇼핑몰 이름보다 우선하는 브랜드 */
+const KNOWN_BRANDS = [
+  'Patagonia', 'The North Face', 'Nike', 'Adidas', 'New Balance', 'Arc\'teryx', 'Columbia', 'Ralph Lauren', 'Polo',
+  'Lacoste', 'Levi\'s', 'Uniqlo', 'Zara', 'COS', 'H&M', 'Muji', 'Gap', 'J.Crew', 'Champion', 'Carhartt', 'Stussy',
+  'Converse', 'Vans', 'Birkenstock', 'Dr. Martens', 'Asics', 'Salomon', 'Hoka', 'On', 'Lululemon', 'Gucci', 'Prada',
+  'Burberry', 'Maison Kitsune', 'Ami', 'Acne Studios', 'Apple', 'Samsung',
+];
+
+function brandFromTitle(title: string) {
+  return KNOWN_BRANDS.filter((b) => b.length > 2).find((b) =>
+    new RegExp(`(^|[^A-Za-z])${b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^A-Za-z]|$)`, 'i').test(title),
+  );
+}
+
+/** 큰 원본 사진을 작게 줄여서 보여주는 주소 (images.weserv.nl) — 실패하면 원본으로 */
+export function thumbUrl(url: string, size = 400) {
+  if (!/^https?:/.test(url)) return url;
+  return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${size}&h=${size}&fit=inside&output=jpg&q=80`;
 }
 
 export async function fetchProductInfo(url: string): Promise<ProductInfo> {
@@ -56,13 +82,15 @@ async function fetchOnce(url: string): Promise<ProductInfo> {
     const img = json.data.image;
     const usable = img?.url && img.type !== 'svg' && !/logo/i.test(img.url);
     // "엠엘비(MLB) 울 빅럭스..." 처럼 제목 앞에 브랜드가 오는 경우
-    const title = json.data.title ? cleanTitle(json.data.title) : undefined;
-    const fromTitle = title?.match(/^([^\s]+\([^)]+\))\s/)?.[1];
     const publisher = json.data.publisher?.replace(/\s+KR$/i, '');
+    const title = json.data.title ? cleanTitle(json.data.title, json.data.publisher) : undefined;
+    const fromTitle = title?.match(/^([^\s]+\([^)]+\))\s/)?.[1];
+    const known = title ? brandFromTitle(title) : undefined;
+    const isStore = publisher && /무신사|29cm|musinsa|shop|store|몰/i.test(publisher);
     return {
       imageUrl: usable ? img!.url : undefined,
       title: fromTitle ? title!.slice(fromTitle.length).trim() : title,
-      brand: fromTitle ?? (publisher && !/무신사|29cm|musinsa/i.test(publisher) ? publisher : undefined),
+      brand: fromTitle ?? known ?? (publisher && !isStore ? publisher : undefined),
     };
   } catch {
     return {};

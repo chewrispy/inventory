@@ -12,7 +12,7 @@ import {
 import { CLOTH_COLORS } from '../../data/clothColors';
 import { roomAt } from '../../utils/geometry';
 import { loadPlanImage } from '../../utils/image';
-import { fetchProductInfo, guessClothType } from '../../utils/productLink';
+import { fetchProductInfo, guessClothType, thumbUrl } from '../../utils/productLink';
 
 interface Draft {
   id?: string;
@@ -180,7 +180,14 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
 
           <label className="cloth-photo-pick">
             {draft.photo || draft.imageUrl ? (
-              <img src={draft.photo ?? draft.imageUrl} alt="" referrerPolicy="no-referrer" />
+              <img
+                src={draft.photo ?? thumbUrl(draft.imageUrl!)}
+                alt=""
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  if (draft.imageUrl && e.currentTarget.src !== draft.imageUrl) e.currentTarget.src = draft.imageUrl;
+                }}
+              />
             ) : (
               <span>
                 {CLOTH_EMOJI[draft.type]}
@@ -427,7 +434,16 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
                     style={{ background: c.clothing!.color ? `${CLOTH_COLORS[c.clothing!.color]}33` : undefined }}
                   >
                     {c.clothing!.photo || c.clothing!.imageUrl ? (
-                      <img src={c.clothing!.photo ?? c.clothing!.imageUrl} alt="" referrerPolicy="no-referrer" loading="lazy" />
+                      <img
+                        src={c.clothing!.photo ?? thumbUrl(c.clothing!.imageUrl!, 300)}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        onError={(e) => {
+                          const orig = c.clothing!.imageUrl;
+                          if (orig && e.currentTarget.src !== orig) e.currentTarget.src = orig;
+                        }}
+                      />
                     ) : (
                       c.emoji
                     )}
