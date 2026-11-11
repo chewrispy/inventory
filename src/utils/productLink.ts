@@ -83,7 +83,8 @@ async function fetchOwn(url: string): Promise<ProductInfo | null> {
     const known = title ? brandFromTitle(title) : undefined;
     const usable = d.image && !/\.svg(\?|$)/i.test(d.image) && !/logo/i.test(d.image);
     return {
-      imageUrl: usable ? d.image : undefined,
+      // 앱이 https라서 http 이미지는 막힐 수 있음 → https로
+      imageUrl: usable ? d.image!.replace(/^http:\/\//, 'https://') : undefined,
       title: fromTitle ? title!.slice(fromTitle.length).trim() : title,
       brand: d.brand || fromTitle || known || undefined,
     };
