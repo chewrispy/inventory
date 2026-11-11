@@ -53,6 +53,18 @@ function brandFromTitle(title: string) {
   );
 }
 
+/** uniqlo.com, nike.com 처럼 브랜드 공식몰이면 주소로 브랜드 판단 */
+function brandFromHost(url: string) {
+  const host = new URL(url).hostname.replace(/^www\./, '');
+  const name = host.split('.')[0];
+  return KNOWN_BRANDS.find((b) => b.toLowerCase().replace(/[^a-z0-9]/g, '') === name.replace(/[^a-z0-9]/g, ''));
+}
+
+function storeAsBrand(site?: string) {
+  if (!site || /무신사|29cm|musinsa|shop|store|몰|마켓|market/i.test(site)) return undefined;
+  return site.replace(/\s+KR$/i, '');
+}
+
 /** 큰 원본 사진을 작게 줄여서 보여주는 주소 (images.weserv.nl) — 실패하면 원본으로 */
 export function thumbUrl(url: string, size = 400) {
   if (!/^https?:/.test(url)) return url;
@@ -86,7 +98,7 @@ async function fetchOwn(url: string): Promise<ProductInfo | null> {
       // 앱이 https라서 http 이미지는 막힐 수 있음 → https로
       imageUrl: usable ? d.image!.replace(/^http:\/\//, 'https://') : undefined,
       title: fromTitle ? title!.slice(fromTitle.length).trim() : title,
-      brand: d.brand || fromTitle || known || undefined,
+      brand: d.brand || fromTitle || known || brandFromHost(url) || storeAsBrand(d.siteName),
     };
   } catch {
     return null; // 서버에 못 닿으면 다른 방법으로
