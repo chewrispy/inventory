@@ -1523,3 +1523,33 @@ a {
 .closet-form > * {
   flex-shrink: 0;
 }
+.owner-tabs {
+  display: flex;
+  margin-bottom: 10px;
+}
+.owner-tabs button {
+  flex: 1;
+  padding: 7px 4px;
+  font-size: 12.5px;
+}
+.owner-hint {
+  margin: -4px 0 8px;
+  font-size: 11.5px;
+}
+.cloth-card {
+  position: relative;
+}
+.cloth-owner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(74, 63, 92, 0.25);
+}

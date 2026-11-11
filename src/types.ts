@@ -113,8 +113,13 @@ export const CLOTH_EMOJI: Record<ClothType, string> = {
   기타: '🧦',
 };
 
+export const CLOTH_OWNERS = ['보미', '제임스', '같이'] as const;
+export type ClothOwner = (typeof CLOTH_OWNERS)[number];
+
 export interface ClothingInfo {
   type: ClothType;
+  /** 누구 옷인지 */
+  owner?: ClothOwner;
   seasons: Season[];
   /** 색 이름 (CLOTH_COLORS의 key) */
   color?: string;

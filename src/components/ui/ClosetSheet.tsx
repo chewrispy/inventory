@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { useInventoryStore } from '../../store/useInventoryStore';
 import {
   CLOTH_EMOJI,
+  CLOTH_OWNERS,
   CLOTH_TYPES,
+  type ClothOwner,
   SEASONS,
   type ClothType,
   type InventoryItem,
@@ -18,6 +20,7 @@ interface Draft {
   id?: string;
   name: string;
   type: ClothType;
+  owner?: ClothOwner;
   seasons: Season[];
   color?: string;
   brand: string;
@@ -31,9 +34,12 @@ interface Draft {
   locationId: string;
 }
 
-const emptyDraft = (roomId: string, type: ClothType = '상의'): Draft => ({
+const OWNER_EMOJI: Record<ClothOwner, string> = { 보미: '👩', 제임스: '👨', 같이: '👫' };
+
+const emptyDraft = (roomId: string, type: ClothType = '상의', owner?: ClothOwner): Draft => ({
   name: '',
   type,
+  owner,
   seasons: [],
   brand: '',
   size: '',
@@ -50,6 +56,7 @@ function toDraft(it: InventoryItem, roomId: string): Draft {
     id: it.id,
     name: it.name,
     type: c.type,
+    owner: c.owner,
     seasons: c.seasons,
     color: c.color,
     brand: c.brand ?? '',
@@ -80,6 +87,7 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
   const openDetail = useInventoryStore((s) => s.openDetail);
 
   const [type, setType] = useState<ClothType | '전체'>('전체');
+  const [owner, setOwner] = useState<ClothOwner | '전체'>('전체');
   const [season, setSeason] = useState<Season | null>(null);
   const [q, setQ] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -97,7 +105,8 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
     [items, places],
   );
 
-  const shown = clothes.filter(
+  const byOwner = clothes.filter((c) => owner === '전체' || c.clothing!.owner === owner);
+  const shown = byOwner.filter(
     (c) =>
       (type === '전체' || c.clothing!.type === type) &&
       (!season || c.clothing!.seasons.length === 0 || c.clothing!.seasons.includes(season)) &&
@@ -106,7 +115,9 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
         (c.clothing!.brand ?? '').includes(q.trim()) ||
         (c.clothing!.color ?? '').includes(q.trim())),
   );
-  const countBy = (t: ClothType) => clothes.filter((c) => c.clothing!.type === t).length;
+  const countBy = (t: ClothType) => byOwner.filter((c) => c.clothing!.type === t).length;
+  const ownerCount = (o: ClothOwner) => clothes.filter((c) => c.clothing!.owner === o).length;
+  const noOwner = clothes.filter((c) => !c.clothing!.owner).length;
 
   const save = () => {
     if (!draft || !draft.name.trim()) return;
@@ -121,6 +132,7 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
       locationId: draft.locationId,
       clothing: {
         type: draft.type,
+        owner: draft.owner,
         seasons: draft.seasons,
         color: draft.color,
         brand: draft.brand.trim() || undefined,
@@ -248,6 +260,21 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
               autoFocus={!draft.id}
             />
           </label>
+
+          <div className="form-label">
+            누구 옷?
+            <div className="chip-tabs">
+              {CLOTH_OWNERS.map((o) => (
+                <button
+                  key={o}
+                  className={draft.owner === o ? 'active' : ''}
+                  onClick={() => setDraft({ ...draft, owner: draft.owner === o ? undefined : o })}
+                >
+                  {OWNER_EMOJI[o]} {o}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="form-label">
             종류
@@ -398,9 +425,22 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+        <div className="segmented owner-tabs" role="tablist">
+          <button className={owner === '전체' ? 'active' : ''} onClick={() => setOwner('전체')}>
+            전체 {clothes.length}
+          </button>
+          {CLOTH_OWNERS.map((o) => (
+            <button key={o} className={owner === o ? 'active' : ''} onClick={() => setOwner(o)}>
+              {OWNER_EMOJI[o]} {o} {ownerCount(o)}
+            </button>
+          ))}
+        </div>
+        {noOwner > 0 && owner === '전체' && (
+          <p className="modal-note owner-hint">주인이 안 정해진 옷이 {noOwner}벌 있어요. 옷을 눌러 '누구 옷?'을 골라주세요.</p>
+        )}
         <div className="chip-tabs">
           <button className={type === '전체' ? 'active' : ''} onClick={() => setType('전체')}>
-            전체 {clothes.length}
+            전체 {byOwner.length}
           </button>
           {CLOTH_TYPES.filter((t) => countBy(t) > 0 || type === t).map((t) => (
             <button key={t} className={type === t ? 'active' : ''} onClick={() => setType(t)}>
@@ -452,6 +492,9 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
                     <Swatch color={c.clothing!.color} />
                     {c.name}
                   </span>
+                  {owner === '전체' && c.clothing!.owner && (
+                    <span className="cloth-owner">{OWNER_EMOJI[c.clothing!.owner]}</span>
+                  )}
                   <span className="cloth-meta">
                     {[c.clothing!.brand, c.clothing!.size].filter(Boolean).join(' · ') ||
                       (c.clothing!.seasons.length ? c.clothing!.seasons.join('·') : '사계절')}
@@ -479,7 +522,7 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
         <div className="detail-actions">
           <button
             className="pixel-btn pixel-btn-accent"
-            onClick={() => setDraft(emptyDraft(room.id, type === '전체' ? '상의' : type))}
+            onClick={() => setDraft(emptyDraft(room.id, type === '전체' ? '상의' : type, owner === '전체' ? undefined : owner))}
           >
             + 옷 추가
           </button>
