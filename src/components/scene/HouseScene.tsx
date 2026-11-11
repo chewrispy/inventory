@@ -12,6 +12,7 @@ import PuffCloud from './PuffCloud';
 const M = 0.01; // cm → m
 
 function RoomFloor({ room }: { room: Room }) {
+  const selectRoom = useInventoryStore((s) => s.selectRoom);
   const geometry = useMemo(() => {
     const shape = new THREE.Shape(room.points.map((p) => new THREE.Vector2(p.x * M, -p.y * M)));
     return new THREE.ShapeGeometry(shape);
@@ -19,11 +20,24 @@ function RoomFloor({ room }: { room: Room }) {
   const lp = labelPoint(room.points);
   return (
     <group>
-      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+      <mesh
+        geometry={geometry}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.02, 0]}
+        receiveShadow
+        onClick={(e) => {
+          e.stopPropagation();
+          if (e.delta > 8) return; // 화면을 돌린 것
+          selectRoom(room.id);
+        }}
+      >
         <meshStandardMaterial color={room.color} roughness={0.8} />
       </mesh>
       <Html position={[lp.x * M, 0.1, lp.y * M]} center distanceFactor={9} zIndexRange={[5, 0]}>
-        <div className="room-label">{room.name}</div>
+        <button className="room-label room-label-btn" onClick={() => selectRoom(room.id)}>
+          {room.kind === 'dressroom' ? '👗 ' : ''}
+          {room.name}
+        </button>
       </Html>
     </group>
   );
@@ -71,6 +85,7 @@ function Furniture({ item, placement: p }: { item: InventoryItem; placement: Pla
 
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+    if (e.delta > 8) return;
     openDetail(item.id);
   };
 
@@ -133,6 +148,7 @@ export default function HouseScene() {
   const items = useInventoryStore((s) => s.items);
   const lowWalls = useInventoryStore((s) => s.lowWalls);
   const selectItem = useInventoryStore((s) => s.selectItem);
+  const selectRoom = useInventoryStore((s) => s.selectRoom);
 
   const placed = items.filter((it): it is InventoryItem & { placement: Placement } => !!it.placement);
   const b = planBounds(
@@ -144,14 +160,19 @@ export default function HouseScene() {
   const extent = Math.max(4, (b.maxX - b.minX) * M, (b.maxY - b.minY) * M);
   // 세로 화면(폰)에서는 가로 시야가 좁으니 더 멀리서 보기
   const aspect = window.innerWidth / Math.max(1, window.innerHeight);
-  const k = aspect < 1 ? Math.min(2.2, 1 / aspect) * 0.95 : 1;
+  const k = aspect < 1 ? Math.min(1.9, 1 / aspect) * 0.82 : 0.9;
 
   return (
     <Canvas
       shadows
       dpr={[1, 1.75]}
       camera={{ position: [cx + extent * 0.35 * k, extent * 1.45 * k, cz + extent * 0.95 * k], fov: 40 }}
-      onPointerMissed={() => selectItem(null)}
+      onPointerMissed={(e) => {
+        // 3D 위에 떠 있는 방 이름 버튼을 누른 경우는 무시
+        if ((e.target as HTMLElement | null)?.tagName !== 'CANVAS') return;
+        selectItem(null);
+        selectRoom(null);
+      }}
     >
       <color attach="background" args={['#bfe6ff']} />
       <fog attach="fog" args={['#d6efff', extent * 3, extent * 6]} />

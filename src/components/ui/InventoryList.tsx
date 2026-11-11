@@ -29,6 +29,7 @@ function buildGroups(items: InventoryItem[], rooms: Room[]): Group[] {
   const byKey = new Map(groups.map((g) => [g.key, g]));
 
   for (const it of items) {
+    if (it.emoji === '🚪' || it.emoji === '🪟') continue; // 문·창문은 목록에서 생략
     if (it.placement) {
       const g = byKey.get(furnitureRoom.get(it.id) ?? '') ?? etc;
       g.rows.push({ item: it, children: items.filter((c) => c.locationId === it.id) });

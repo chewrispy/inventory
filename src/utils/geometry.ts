@@ -84,13 +84,21 @@ export function wallSegments(rooms: Room[]): WallSeg[] {
   const seen = new Set<string>();
   const out: WallSeg[] = [];
   const key = (p: Pt) => `${Math.round(p.x)},${Math.round(p.y)}`;
+  const edgeKey = (a: Pt, b: Pt) => [key(a), key(b)].sort().join('|');
+  // 한쪽 방이라도 '트인 변'으로 표시했으면 벽을 세우지 않음
+  const open = new Set<string>();
+  for (const room of rooms) {
+    for (const i of room.open ?? []) {
+      open.add(edgeKey(room.points[i], room.points[(i + 1) % room.points.length]));
+    }
+  }
   for (const room of rooms) {
     for (let i = 0; i < room.points.length; i += 1) {
       const a = room.points[i];
       const b = room.points[(i + 1) % room.points.length];
       if (dist(a, b) < 1) continue;
-      const k = [key(a), key(b)].sort().join('|');
-      if (seen.has(k)) continue;
+      const k = edgeKey(a, b);
+      if (seen.has(k) || open.has(k)) continue;
       seen.add(k);
       out.push({ a, b });
     }

@@ -71,6 +71,14 @@ export default function EditToolbar() {
               />
             ))}
           </div>
+          <label className="room-kind">
+            <input
+              type="checkbox"
+              checked={selectedRoom.kind === 'dressroom'}
+              onChange={(e) => updateRoom(selectedRoom.id, { kind: e.target.checked ? 'dressroom' : undefined })}
+            />
+            👗 드레스룸 (들어가면 옷장 관리)
+          </label>
           <div className="room-edit-actions">
             <button
               className="pixel-btn pixel-btn-sm pixel-btn-danger"

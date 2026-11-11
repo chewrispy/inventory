@@ -37,6 +37,10 @@ export interface Room {
   name: string;
   points: Pt[];
   color: string;
+  /** 벽 없이 트인 변의 번호 (points[i] → points[i+1]). 예: 거실↔주방 */
+  open?: number[];
+  /** 드레스룸이면 들어갔을 때 옷장 관리 화면 */
+  kind?: 'dressroom';
 }
 
 /** 도면 참고 이미지 */
@@ -83,6 +87,35 @@ export interface InventoryItem {
   color?: string;
   /** 작은 물건: 들어있는 가구 id 또는 방 id */
   locationId?: string;
+  /** 옷이면 옷장 정보 */
+  clothing?: ClothingInfo;
+}
+
+export const CLOTH_TYPES = ['상의', '하의', '아우터', '원피스', '신발', '가방', '액세서리', '기타'] as const;
+export type ClothType = (typeof CLOTH_TYPES)[number];
+export const SEASONS = ['봄', '여름', '가을', '겨울'] as const;
+export type Season = (typeof SEASONS)[number];
+
+export const CLOTH_EMOJI: Record<ClothType, string> = {
+  상의: '👕',
+  하의: '👖',
+  아우터: '🧥',
+  원피스: '👗',
+  신발: '👟',
+  가방: '👜',
+  액세서리: '💍',
+  기타: '🧦',
+};
+
+export interface ClothingInfo {
+  type: ClothType;
+  seasons: Season[];
+  /** 색 이름 (CLOTH_COLORS의 key) */
+  color?: string;
+  brand?: string;
+  size?: string;
+  /** 작게 줄인 사진 dataURL */
+  photo?: string;
 }
 
 /** an item marked to sell/declutter on 당근마켓 */

@@ -10,6 +10,7 @@ import ShoppingListDrawer from './components/ui/ShoppingListDrawer';
 import AddItemModal from './components/ui/AddItemModal';
 import CatalogSheet from './components/ui/CatalogSheet';
 import InventoryList from './components/ui/InventoryList';
+import ClosetSheet from './components/ui/ClosetSheet';
 import { useInventoryStore } from './store/useInventoryStore';
 
 function EmptyState() {
@@ -44,6 +45,7 @@ function App() {
   const isListOpen = useInventoryStore((s) => s.isListOpen);
   const closeList = useInventoryStore((s) => s.closeList);
   const editing = view === '2d' && planMode === 'edit';
+  const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
 
   return (
     <div className="app-root">
@@ -55,7 +57,12 @@ function App() {
       {view === '3d' && <div className="hint-bar">드래그로 돌려보고 · 가구를 눌러보세요</div>}
 
       {isListOpen && <InventoryList onClose={closeList} />}
-      {!editing && selectedRoomId && <InventoryList roomId={selectedRoomId} onClose={() => selectRoom(null)} />}
+      {!editing && selectedRoom?.kind === 'dressroom' && (
+        <ClosetSheet room={selectedRoom} onClose={() => selectRoom(null)} />
+      )}
+      {!editing && selectedRoom && selectedRoom.kind !== 'dressroom' && (
+        <InventoryList roomId={selectedRoom.id} onClose={() => selectRoom(null)} />
+      )}
       <ItemDetailLayer />
       <SellBinDrawer />
       <ShoppingListDrawer />

@@ -10,7 +10,7 @@ import type {
   SellEntry,
   ShoppingEntry,
 } from '../types';
-import { SAMPLE_ITEMS, SAMPLE_ROOMS } from '../data/sample';
+import { HOME_ITEMS, HOME_ROOMS } from '../data/myHome';
 import { guessByEmoji } from '../data/catalog';
 
 export type ViewMode = '2d' | '3d';
@@ -91,6 +91,8 @@ interface InventoryState {
 
 /** 예전 버전의 방 1칸 → cm (기본 방 6칸 ≈ 3.6m). 저장 데이터 복원이 스토어 생성 중에 일어나므로 위에 둬야 함 */
 const UNIT_CM = 60;
+/** 예전 샘플 집의 방 id — 이것뿐이면 보미네 집으로 교체 (v3) */
+const SAMPLE_ROOM_IDS = new Set(['living', 'kitchen', 'bathroom', 'bedroom', 'study']);
 
 /** localStorage가 꽉 차면(큰 도면 이미지) 앱이 죽지 않도록 */
 const safeStorage: StateStorage = {
@@ -113,13 +115,13 @@ const upsertEntry = (list: SellEntry[], itemId: string, qty: number) =>
 export const useInventoryStore = create<InventoryState>()(
   persist(
     (set, get) => ({
-      rooms: SAMPLE_ROOMS,
+      rooms: HOME_ROOMS,
       background: null,
-      items: SAMPLE_ITEMS,
+      items: HOME_ITEMS,
       sellBin: [],
       shoppingList: [],
 
-      view: '2d',
+      view: '3d',
       planMode: 'arrange',
       editTool: 'select',
       viewCenter: { x: 400, y: 400 },
@@ -273,8 +275,11 @@ export const useInventoryStore = create<InventoryState>()(
     }),
     {
       name: 'home-inventory',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => safeStorage),
+      onRehydrateStorage: () => (_state, error) => {
+        if (error) console.error('저장된 데이터를 불러오지 못했어요', error);
+      },
       partialize: (s) => ({
         rooms: s.rooms,
         background: s.background,
@@ -283,7 +288,11 @@ export const useInventoryStore = create<InventoryState>()(
         shoppingList: s.shoppingList,
         lowWalls: s.lowWalls,
       }),
-      migrate: (persisted, version) => (version < 2 ? migrateV1(persisted) : persisted) as never,
+      migrate: (persisted, version) => {
+        let s = version < 2 ? migrateV1(persisted) : persisted;
+        if (version < 3) s = replaceSampleHome(s);
+        return s as never;
+      },
     },
   ),
 );
@@ -356,12 +365,48 @@ function migrateV1(old: unknown) {
   });
 
   return {
-    rooms: o.rooms ? rooms : SAMPLE_ROOMS,
+    rooms: o.rooms ? rooms : HOME_ROOMS,
     background: null,
-    items: o.items ? items : SAMPLE_ITEMS,
+    items: o.items ? items : HOME_ITEMS,
     sellBin: o.sellBin ?? [],
     shoppingList: o.shoppingList ?? [],
     lowWalls: false,
+  };
+}
+
+/* ---------- v3: 샘플 집이면 보미네 집으로 바꾸기 (직접 추가한 물건은 유지) ---------- */
+
+function replaceSampleHome(state: unknown) {
+  const s = (state ?? {}) as {
+    rooms?: Room[];
+    items?: InventoryItem[];
+    sellBin?: SellEntry[];
+    shoppingList?: ShoppingEntry[];
+  };
+  const rooms = s.rooms ?? [];
+  const isSample = rooms.length === 0 || rooms.every((r) => SAMPLE_ROOM_IDS.has(r.id));
+  if (!isSample) return state;
+
+  const roomIds = new Set(HOME_ROOMS.map((r) => r.id));
+  const mine = (s.items ?? []).filter((it) => !it.id.startsWith('seed-'));
+  const mineIds = new Set(mine.map((it) => it.id));
+  const kept = mine
+    // 예전 샘플 가구는 새 도면 위치와 안 맞아서 빼고, 직접 넣은 작은 물건은 유지
+    .filter((it) => !it.placement)
+    .map((it) =>
+      it.locationId && !roomIds.has(it.locationId) && !mineIds.has(it.locationId)
+        ? { ...it, locationId: undefined }
+        : it,
+    );
+  const items = [...HOME_ITEMS, ...kept];
+  const ids = new Set(items.map((it) => it.id));
+  return {
+    ...s,
+    rooms: HOME_ROOMS,
+    background: null,
+    items,
+    sellBin: (s.sellBin ?? []).filter((c) => ids.has(c.itemId)),
+    shoppingList: (s.shoppingList ?? []).filter((c) => ids.has(c.itemId)),
   };
 }
 

@@ -1230,3 +1230,165 @@ a {
     padding: 20px 18px;
   }
 }
+
+/* 3D 방 이름 버튼 */
+.room-label-btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  pointer-events: auto;
+}
+.room-kind {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 드레스룸 옷장 */
+.closet-sheet .chip-tabs {
+  margin-bottom: 8px;
+}
+.chip-tabs-sub button {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+.chip-wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+.form-hint {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.cloth-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.cloth-card {
+  border: none;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: 0 3px 10px -5px rgba(74, 63, 92, 0.3);
+  padding: 6px 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+  min-width: 0;
+}
+.cloth-thumb {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: #f4f0f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  overflow: hidden;
+}
+.cloth-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cloth-name {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cloth-meta {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cloth-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.closet-empty {
+  text-align: center;
+  padding: 24px 8px;
+  font-size: 32px;
+}
+.closet-empty p {
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+.closet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.cloth-photo-pick {
+  align-self: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  background: #f4f0f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cloth-photo-pick span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 38px;
+}
+.cloth-photo-pick small {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.cloth-photo-pick img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cloth-colors {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+.cloth-color {
+  border: none;
+  background: #fff;
+  border-radius: 10px;
+  padding: 5px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.cloth-color span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.cloth-color.active {
+  box-shadow: inset 0 0 0 2px var(--accent);
+  color: var(--accent-dark);
+}
