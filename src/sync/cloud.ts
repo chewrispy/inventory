@@ -26,6 +26,7 @@ import {
 import { create } from 'zustand';
 import { useInventoryStore } from '../store/useInventoryStore';
 import type { InventoryItem } from '../types';
+import { applyDataFixes } from '../data/fixes';
 
 /** 웹 앱 설정값 — 원래 웹페이지에 공개되는 값. 실제 보호는 Firestore 보안 규칙이 담당 */
 const firebaseConfig = {
@@ -212,6 +213,7 @@ async function start() {
       metaRef,
       (snap) => {
         if (!snap.exists() || snap.metadata.hasPendingWrites) return;
+        if (snap.metadata.fromCache && !ready) return;
         const d = snap.data() as Partial<Meta>;
         const meta: Meta = {
           rooms: d.rooms ?? [],
@@ -234,6 +236,8 @@ async function start() {
       { includeMetadataChanges: true },
       (snap) => {
         if (snap.metadata.hasPendingWrites) return;
+        // 새 기기의 빈 캐시는 '데이터 없음'이 아니라 '아직 모름' — 서버 응답을 기다림
+        if (snap.metadata.fromCache && snap.empty) return;
         const items = snap.docs.map((d) => d.data() as InventoryItem);
         lastItems = new Map(items.map((it) => [it.id, stable(it)]));
         const local = useInventoryStore.getState().items;
@@ -245,7 +249,12 @@ async function start() {
           items.sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
           applyRemote(() => useInventoryStore.setState({ items }));
         }
-        ready = true;
+        if (!ready) {
+          ready = true;
+          // 클라우드에 있는 옛 배치도 한 번 보정 (사용자가 옮긴 가구는 그대로)
+          const fixed = applyDataFixes(useInventoryStore.getState().items);
+          if (fixed) useInventoryStore.setState({ items: fixed });
+        }
         setSync({ status: snap.metadata.fromCache && !navigator.onLine ? 'offline' : 'synced' });
       },
       handleError,

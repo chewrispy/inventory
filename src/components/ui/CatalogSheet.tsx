@@ -30,6 +30,7 @@ export default function CatalogSheet() {
         d: e.d,
         h: e.h,
         z: e.z,
+        shape: e.shape,
         rot: 0,
       },
     });

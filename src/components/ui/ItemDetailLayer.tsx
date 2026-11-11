@@ -115,6 +115,14 @@ export default function ItemDetailLayer() {
               <NumField label="높이 cm" value={p.h} onChange={(v) => updatePlacement(item.id, { h: Math.max(1, v ?? 1) })} />
               <NumField label="띄움 cm" value={p.z ?? 0} onChange={(v) => updatePlacement(item.id, { z: v || undefined })} />
             </div>
+            <div className="chip-tabs">
+              <button className={p.shape !== 'round' ? 'active' : ''} onClick={() => updatePlacement(item.id, { shape: undefined })}>
+                ▭ 사각형
+              </button>
+              <button className={p.shape === 'round' ? 'active' : ''} onClick={() => updatePlacement(item.id, { shape: 'round' })}>
+                ◯ 원형
+              </button>
+            </div>
             <div className="rotate-row">
               <span className="detail-label">방향 {Math.round(p.rot)}°</span>
               <input

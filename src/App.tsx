@@ -12,6 +12,7 @@ import CatalogSheet from './components/ui/CatalogSheet';
 import InventoryList from './components/ui/InventoryList';
 import ClosetSheet from './components/ui/ClosetSheet';
 import { useInventoryStore } from './store/useInventoryStore';
+import { login, useSyncStore } from './sync/cloud';
 
 function EmptyState() {
   const setPlanMode = useInventoryStore((s) => s.setPlanMode);
@@ -45,6 +46,7 @@ function App() {
   const isListOpen = useInventoryStore((s) => s.isListOpen);
   const closeList = useInventoryStore((s) => s.closeList);
   const editing = view === '2d' && planMode === 'edit';
+  const user = useSyncStore((s) => s.user);
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
 
   return (
@@ -54,6 +56,11 @@ function App() {
       {editing ? <EditToolbar /> : <BottomBar />}
       {view === '2d' && !editing && <SelectionBar />}
       {rooms.length === 0 && !editing && <EmptyState />}
+      {!user && !editing && (
+        <button className="login-banner" onClick={() => void login()}>
+          ☁️ 이 기기에만 저장 중이에요 · <b>로그인하면 우리 집 데이터가 보여요</b>
+        </button>
+      )}
       {view === '3d' && <div className="hint-bar">드래그로 돌려보고 · 가구를 눌러보세요</div>}
 
       {isListOpen && <InventoryList onClose={closeList} />}

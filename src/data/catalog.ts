@@ -9,6 +9,7 @@ export interface CatalogEntry {
   d: number;
   h: number;
   z?: number;
+  shape?: 'round';
   color: string;
 }
 
@@ -22,6 +23,7 @@ export const CATALOG: Record<CatalogGroup, CatalogEntry[]> = {
     { key: 'sofa-2', name: '2인 소파', emoji: '🛋️', category: 'furniture', w: 160, d: 85, h: 80, color: '#cfd8f2' },
     { key: 'sofa-3', name: '3인 소파', emoji: '🛋️', category: 'furniture', w: 220, d: 90, h: 80, color: '#cfd8f2' },
     { key: 'chair', name: '의자', emoji: '🪑', category: 'furniture', w: 50, d: 50, h: 80, color: '#e8d2b0' },
+    { key: 'table-round', name: '원형 식탁', emoji: '🍽️', category: 'furniture', w: 100, d: 100, h: 75, shape: 'round', color: '#e8d2b0' },
     { key: 'table-4', name: '4인 식탁', emoji: '🍽️', category: 'furniture', w: 140, d: 80, h: 75, color: '#e8d2b0' },
     { key: 'desk', name: '책상', emoji: '✏️', category: 'furniture', w: 120, d: 60, h: 73, color: '#e8d2b0' },
     { key: 'wardrobe', name: '옷장', emoji: '👚', category: 'furniture', w: 120, d: 60, h: 200, color: '#efe3d3' },

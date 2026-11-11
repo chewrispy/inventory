@@ -72,6 +72,8 @@ export interface Placement {
   z?: number;
   /** 회전(도), 시계 방향 */
   rot: number;
+  /** 원형(원형 식탁 등). 없으면 사각형 */
+  shape?: 'round';
 }
 
 export interface InventoryItem {

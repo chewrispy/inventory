@@ -445,19 +445,29 @@ export default function PlanCanvas() {
               return (
                 <g key={it.id} data-item={it.id} transform={`translate(${p.x} ${p.y})`} className="plan-item">
                   <g transform={`rotate(${p.rot})`}>
-                    <rect
-                      x={-p.w / 2}
-                      y={-p.d / 2}
-                      width={p.w}
-                      height={p.d}
-                      rx={Math.min(8, p.w / 6, p.d / 3)}
-                      fill={color}
-                      fillOpacity={p.h <= 2 ? 0.6 : 1}
-                      stroke={sel ? '#ff6f91' : darken(color, 0.3)}
-                      strokeWidth={(sel ? 3.5 : 1.5) * inv}
-                    />
+                    {p.shape === 'round' ? (
+                      <ellipse
+                        rx={p.w / 2}
+                        ry={p.d / 2}
+                        fill={color}
+                        stroke={sel ? '#ff6f91' : darken(color, 0.3)}
+                        strokeWidth={(sel ? 3.5 : 1.5) * inv}
+                      />
+                    ) : (
+                      <rect
+                        x={-p.w / 2}
+                        y={-p.d / 2}
+                        width={p.w}
+                        height={p.d}
+                        rx={Math.min(8, p.w / 6, p.d / 3)}
+                        fill={color}
+                        fillOpacity={p.h <= 2 ? 0.6 : 1}
+                        stroke={sel ? '#ff6f91' : darken(color, 0.3)}
+                        strokeWidth={(sel ? 3.5 : 1.5) * inv}
+                      />
+                    )}
                     {/* 정면 표시 (아래쪽이 앞) */}
-                    {!isThin && p.h > 2 && (
+                    {!isThin && p.h > 2 && p.shape !== 'round' && (
                       <line
                         x1={-p.w / 2 + 4}
                         x2={p.w / 2 - 4}

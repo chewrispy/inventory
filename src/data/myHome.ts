@@ -1,4 +1,5 @@
 import type { InventoryItem, Room } from '../types';
+import { applyDataFixes } from './fixes';
 
 /**
  * 보미네 집 (세종로대우 52평 기본형).
@@ -323,7 +324,7 @@ export const HOME_ROOMS: Room[] = [
   }
 ];
 
-export const HOME_ITEMS: InventoryItem[] = [
+const RAW_ITEMS: InventoryItem[] = [
   {
     "id": "door-front",
     "name": "현관문",
@@ -958,3 +959,5 @@ export const HOME_ITEMS: InventoryItem[] = [
     }
   }
 ];
+
+export const HOME_ITEMS: InventoryItem[] = applyDataFixes(RAW_ITEMS) ?? RAW_ITEMS;

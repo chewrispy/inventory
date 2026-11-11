@@ -1485,3 +1485,22 @@ a {
   font-size: 12.5px;
   font-weight: 700;
 }
+.login-banner {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 74px;
+  z-index: 15;
+  border: none;
+  background: #fff8e6;
+  color: var(--ink);
+  font-size: 12px;
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  box-shadow: var(--shadow-btn);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.login-banner b {
+  color: var(--accent-dark);
+}

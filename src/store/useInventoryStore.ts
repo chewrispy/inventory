@@ -12,6 +12,7 @@ import type {
 } from '../types';
 import { HOME_ITEMS, HOME_ROOMS } from '../data/myHome';
 import { guessByEmoji } from '../data/catalog';
+import { applyDataFixes } from '../data/fixes';
 
 export type ViewMode = '2d' | '3d';
 export type PlanMode = 'arrange' | 'edit';
@@ -275,7 +276,7 @@ export const useInventoryStore = create<InventoryState>()(
     }),
     {
       name: 'home-inventory',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => safeStorage),
       onRehydrateStorage: () => (_state, error) => {
         if (error) console.error('저장된 데이터를 불러오지 못했어요', error);
@@ -291,6 +292,11 @@ export const useInventoryStore = create<InventoryState>()(
       migrate: (persisted, version) => {
         let s = version < 2 ? migrateV1(persisted) : persisted;
         if (version < 3) s = replaceSampleHome(s);
+        if (version < 4) {
+          const st = s as { items?: InventoryItem[] };
+          const fixed = st.items ? applyDataFixes(st.items) : null;
+          if (fixed) s = { ...st, items: fixed };
+        }
         return s as never;
       },
     },

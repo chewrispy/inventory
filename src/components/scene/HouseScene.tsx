@@ -91,11 +91,10 @@ function Furniture({ item, placement: p }: { item: InventoryItem; placement: Pla
 
   return (
     <group position={[p.x * M, lift, p.y * M]} rotation={[0, -(p.rot * Math.PI) / 180, 0]}>
-      <RoundedBox
-        args={[w, h, d]}
-        radius={Math.min(0.04, w / 4, d / 4, h / 2)}
-        smoothness={3}
-        position={[0, h / 2, 0]}
+      {p.shape === 'round' ? (
+        <mesh
+          position={[0, h / 2, 0]}
+          scale={[w, h, d]}
         castShadow
         receiveShadow
         onClick={onClick}
@@ -104,16 +103,42 @@ function Furniture({ item, placement: p }: { item: InventoryItem; placement: Pla
           setHover(true);
         }}
         onPointerOut={() => setHover(false)}
-      >
+        >
+          <cylinderGeometry args={[0.5, 0.5, 1, 40]} />
         <meshStandardMaterial
-          color={hover || sel ? darken(color, -0.08) : color}
-          roughness={0.6}
-          transparent={isGlass}
-          opacity={isGlass ? 0.55 : 1}
-          emissive={sel ? '#ff6f91' : '#000000'}
-          emissiveIntensity={sel ? 0.25 : 0}
-        />
-      </RoundedBox>
+            color={hover || sel ? darken(color, -0.08) : color}
+            roughness={0.6}
+            transparent={isGlass}
+            opacity={isGlass ? 0.55 : 1}
+            emissive={sel ? '#ff6f91' : '#000000'}
+            emissiveIntensity={sel ? 0.25 : 0}
+          />
+        </mesh>
+      ) : (
+        <RoundedBox
+          args={[w, h, d]}
+          radius={Math.min(0.04, w / 4, d / 4, h / 2)}
+          smoothness={3}
+          position={[0, h / 2, 0]}
+          castShadow
+          receiveShadow
+          onClick={onClick}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHover(true);
+          }}
+          onPointerOut={() => setHover(false)}
+        >
+          <meshStandardMaterial
+            color={hover || sel ? darken(color, -0.08) : color}
+            roughness={0.6}
+            transparent={isGlass}
+            opacity={isGlass ? 0.55 : 1}
+            emissive={sel ? '#ff6f91' : '#000000'}
+            emissiveIntensity={sel ? 0.25 : 0}
+          />
+        </RoundedBox>
+      )}
       {/* 윗면 아이콘 */}
       <mesh position={[0, h + 0.006, 0]} rotation={[-Math.PI / 2, 0, (p.rot * Math.PI) / 180]}>
         <planeGeometry args={[icon, icon]} />
