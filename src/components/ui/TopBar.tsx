@@ -1,4 +1,5 @@
 import { useInventoryStore } from '../../store/useInventoryStore';
+import AccountButton from './AccountButton';
 
 export default function TopBar() {
   const view = useInventoryStore((s) => s.view);
@@ -20,14 +21,16 @@ export default function TopBar() {
   }
 
   return (
+    <>
+    {view === '3d' && (
+      <button className="plan-fit-btn walls-btn" onClick={toggleLowWalls}>
+        {lowWalls ? '벽 올리기' : '벽 낮추기'}
+      </button>
+    )}
     <div className="topbar">
-      <div className="topbar-title">🏠 우리집 인벤토리</div>
+      <div className="topbar-title">🏠 우리집</div>
       <div className="topbar-right">
-        {view === '3d' && (
-          <button className="pixel-btn pixel-btn-sm" onClick={toggleLowWalls}>
-            {lowWalls ? '벽 올리기' : '벽 낮추기'}
-          </button>
-        )}
+        <AccountButton />
         <div className="segmented" role="tablist">
           <button
             role="tab"
@@ -48,5 +51,6 @@ export default function TopBar() {
         </div>
       </div>
     </div>
+    </>
   );
 }

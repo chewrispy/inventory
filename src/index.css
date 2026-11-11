@@ -1417,3 +1417,71 @@ a {
 .iot-pin-sel {
   border-color: #ff6f91;
 }
+
+/* 계정 / 동기화 */
+.account-wrap {
+  position: relative;
+}
+.account-btn {
+  border: none;
+  background: #f1edf6;
+  border-radius: var(--radius-pill);
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+}
+.account-btn img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  margin: 0 -6px;
+}
+.account-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  font-size: 9px;
+  font-style: normal;
+}
+.account-pop {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  width: 230px;
+  padding: 14px;
+  z-index: 40;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.account-email {
+  font-weight: 700;
+  font-size: 13px;
+  word-break: break-all;
+}
+.account-status {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.account-msg {
+  font-size: 12px;
+  color: var(--danger-dark);
+  margin: 0;
+}
+.walls-btn {
+  width: auto;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  padding: 0 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
