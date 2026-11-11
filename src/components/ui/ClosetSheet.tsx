@@ -12,6 +12,7 @@ import {
 import { CLOTH_COLORS } from '../../data/clothColors';
 import { roomAt } from '../../utils/geometry';
 import { loadPlanImage } from '../../utils/image';
+import { fetchProductInfo, guessClothType } from '../../utils/productLink';
 
 interface Draft {
   id?: string;
@@ -25,6 +26,8 @@ interface Draft {
   purchasedAt: string;
   memo: string;
   photo?: string;
+  imageUrl?: string;
+  link: string;
   locationId: string;
 }
 
@@ -37,6 +40,7 @@ const emptyDraft = (roomId: string, type: ClothType = '상의'): Draft => ({
   price: '',
   purchasedAt: '',
   memo: '',
+  link: '',
   locationId: roomId,
 });
 
@@ -54,6 +58,8 @@ function toDraft(it: InventoryItem, roomId: string): Draft {
     purchasedAt: it.purchasedAt ?? '',
     memo: it.memo ?? '',
     photo: c.photo,
+    imageUrl: c.imageUrl,
+    link: c.link ?? '',
     locationId: it.locationId ?? roomId,
   };
 }
@@ -78,6 +84,7 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
   const [q, setQ] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);
   const [sold, setSold] = useState(false);
+  const [fetching, setFetching] = useState<'idle' | 'loading' | 'fail'>('idle');
 
   // 드레스룸 안에 놓인 가구(스타일러, 행거 등)
   const furniture = useMemo(
@@ -119,6 +126,8 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
         brand: draft.brand.trim() || undefined,
         size: draft.size.trim() || undefined,
         photo: draft.photo,
+        imageUrl: draft.imageUrl,
+        link: draft.link.trim() || undefined,
       },
     };
     if (draft.id) updateItem(draft.id, data);
@@ -129,7 +138,29 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
   const onPhoto = async (file?: File) => {
     if (!file || !draft) return;
     const img = await loadPlanImage(file, 360);
-    setDraft({ ...draft, photo: img.dataUrl });
+    setDraft({ ...draft, photo: img.dataUrl, imageUrl: undefined });
+  };
+
+  const onFetchLink = async () => {
+    if (!draft) return;
+    const url = draft.link.trim();
+    if (!/^https?:\/\//.test(url)) return;
+    setFetching('loading');
+    const info = await fetchProductInfo(url);
+    setDraft((d) =>
+      d
+        ? {
+            ...d,
+            imageUrl: info.imageUrl ?? d.imageUrl,
+            photo: info.imageUrl ? undefined : d.photo,
+            name: d.name.trim() ? d.name : (info.title ?? d.name),
+            // 이름을 새로 채운 경우에만 종류도 추측 (직접 고른 건 존중)
+            type: !d.name.trim() && guessClothType(info.title) ? guessClothType(info.title)! : d.type,
+            brand: d.brand.trim() ? d.brand : (info.brand ?? d.brand),
+          }
+        : d,
+    );
+    setFetching(info.imageUrl ? 'idle' : 'fail');
   };
 
   if (draft) {
@@ -148,8 +179,8 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
           <h3 className="modal-title">{draft.id ? '옷 정보' : '👗 옷 추가'}</h3>
 
           <label className="cloth-photo-pick">
-            {draft.photo ? (
-              <img src={draft.photo} alt="" />
+            {draft.photo || draft.imageUrl ? (
+              <img src={draft.photo ?? draft.imageUrl} alt="" referrerPolicy="no-referrer" />
             ) : (
               <span>
                 {CLOTH_EMOJI[draft.type]}
@@ -158,11 +189,47 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
             )}
             <input type="file" accept="image/*" hidden onChange={(e) => void onPhoto(e.target.files?.[0])} />
           </label>
-          {draft.photo && (
-            <button className="text-btn text-btn-danger" onClick={() => setDraft({ ...draft, photo: undefined })}>
+          {(draft.photo || draft.imageUrl) && (
+            <button
+              className="text-btn text-btn-danger"
+              onClick={() => setDraft({ ...draft, photo: undefined, imageUrl: undefined })}
+            >
               사진 지우기
             </button>
           )}
+
+          <div className="form-label">
+            🔗 상품 링크로 사진 가져오기
+            <div className="link-row">
+              <input
+                className="form-input"
+                inputMode="url"
+                placeholder="무신사·유니클로 등 상품 페이지 주소"
+                value={draft.link}
+                onChange={(e) => {
+                  setDraft({ ...draft, link: e.target.value });
+                  setFetching('idle');
+                }}
+              />
+              <button
+                className="pixel-btn pixel-btn-sm"
+                disabled={!/^https?:\/\//.test(draft.link.trim()) || fetching === 'loading'}
+                onClick={() => void onFetchLink()}
+              >
+                {fetching === 'loading' ? '가져오는 중…' : '가져오기'}
+              </button>
+            </div>
+            {fetching === 'fail' && (
+              <small className="form-hint link-fail">
+                이 사이트는 사진을 못 가져왔어요. 상품 사진을 길게 눌러 <b>이미지 주소 복사</b> 후 여기에 붙여넣어 보세요.
+              </small>
+            )}
+            {draft.link && /^https?:\/\//.test(draft.link) && fetching !== 'loading' && (
+              <a className="text-btn" href={draft.link} target="_blank" rel="noreferrer">
+                상품 페이지 열기 ↗
+              </a>
+            )}
+          </div>
 
           <label className="form-label">
             이름
@@ -359,7 +426,11 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
                     className="cloth-thumb"
                     style={{ background: c.clothing!.color ? `${CLOTH_COLORS[c.clothing!.color]}33` : undefined }}
                   >
-                    {c.clothing!.photo ? <img src={c.clothing!.photo} alt="" /> : c.emoji}
+                    {c.clothing!.photo || c.clothing!.imageUrl ? (
+                      <img src={c.clothing!.photo ?? c.clothing!.imageUrl} alt="" referrerPolicy="no-referrer" loading="lazy" />
+                    ) : (
+                      c.emoji
+                    )}
                   </span>
                   <span className="cloth-name">
                     <Swatch color={c.clothing!.color} />

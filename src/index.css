@@ -1487,9 +1487,12 @@ a {
 }
 .login-banner {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 74px;
+  left: 14px;
+  right: 66px;
+  max-width: 480px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  top: 80px;
   z-index: 15;
   border: none;
   background: #fff8e6;
@@ -1503,4 +1506,20 @@ a {
 }
 .login-banner b {
   color: var(--accent-dark);
+}
+.link-row {
+  display: flex;
+  gap: 6px;
+}
+.link-row .form-input {
+  flex: 1;
+  min-width: 0;
+}
+.link-fail {
+  color: var(--danger-dark);
+  line-height: 1.5;
+}
+
+.closet-form > * {
+  flex-shrink: 0;
 }

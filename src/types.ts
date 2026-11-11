@@ -120,8 +120,12 @@ export interface ClothingInfo {
   color?: string;
   brand?: string;
   size?: string;
-  /** 작게 줄인 사진 dataURL */
+  /** 작게 줄인 사진 dataURL (직접 찍은 사진) */
   photo?: string;
+  /** 브랜드 사이트 상품 이미지 주소 */
+  imageUrl?: string;
+  /** 상품 페이지 링크 */
+  link?: string;
 }
 
 /** an item marked to sell/declutter on 당근마켓 */

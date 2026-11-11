@@ -58,7 +58,7 @@ function App() {
       {rooms.length === 0 && !editing && <EmptyState />}
       {!user && !editing && (
         <button className="login-banner" onClick={() => void login()}>
-          ☁️ 이 기기에만 저장 중이에요 · <b>로그인하면 우리 집 데이터가 보여요</b>
+          ☁️ <b>로그인</b>하면 우리 집 데이터가 보여요
         </button>
       )}
       {view === '3d' && <div className="hint-bar">드래그로 돌려보고 · 가구를 눌러보세요</div>}
