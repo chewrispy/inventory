@@ -66,7 +66,37 @@ export async function fetchProductInfo(url: string): Promise<ProductInfo> {
   return first.imageUrl || first.title ? first : fetchOnce(url);
 }
 
+/** 보미 Vercel 계정의 inventory-api (server/api/og.js) */
+const OWN_API = 'https://inventory-api-chewrispys-projects.vercel.app/api/og';
+
+async function fetchOwn(url: string): Promise<ProductInfo | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const res = await fetch(`${OWN_API}?url=${encodeURIComponent(url)}`, { signal: ctrl.signal });
+    if (!res.ok) return null;
+    const d = (await res.json()) as { url?: string; title?: string; siteName?: string; brand?: string; image?: string };
+    const productId = new URL(url).pathname.match(/\d{5,}/)?.[0];
+    if (productId && d.url && !d.url.includes(productId)) return {};
+    const title = d.title ? cleanTitle(d.title, d.siteName) : undefined;
+    const fromTitle = title?.match(/^([^\s]+\([^)]+\))\s/)?.[1];
+    const known = title ? brandFromTitle(title) : undefined;
+    const usable = d.image && !/\.svg(\?|$)/i.test(d.image) && !/logo/i.test(d.image);
+    return {
+      imageUrl: usable ? d.image : undefined,
+      title: fromTitle ? title!.slice(fromTitle.length).trim() : title,
+      brand: d.brand || fromTitle || known || undefined,
+    };
+  } catch {
+    return null; // 서버에 못 닿으면 다른 방법으로
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchOnce(url: string): Promise<ProductInfo> {
+  const own = await fetchOwn(url);
+  if (own && (own.imageUrl || own.title)) return own;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 30000);
   try {
