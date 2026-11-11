@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { describeLocation, useInventoryStore } from '../../store/useInventoryStore';
-import { CATEGORY_LABEL, type Category, type Condition, type InventoryItem } from '../../types';
+import { CATEGORY_LABEL, IOT_APPS, type Category, type Condition, type InventoryItem } from '../../types';
 import { FURNITURE_COLORS } from '../../data/catalog';
 import { roomAt } from '../../utils/geometry';
 import DaangnModal from './DaangnModal';
@@ -84,9 +84,27 @@ export default function ItemDetailLayer() {
               <span className="tag">{CATEGORY_LABEL[item.category]}</span>
               <span className="tag">📍 {where}</span>
               {item.condition && <span className="tag">{item.condition}</span>}
+              {item.iotApp && <span className="tag">📲 {item.iotApp}</span>}
             </div>
           </div>
         </div>
+
+        {item.category === 'iot' && (
+          <div className="detail-section">
+            <div className="detail-section-title">연결 앱</div>
+            <div className="chip-tabs chip-wrap">
+              {IOT_APPS.map((a) => (
+                <button
+                  key={a}
+                  className={item.iotApp === a ? 'active' : ''}
+                  onClick={() => set({ iotApp: item.iotApp === a ? undefined : a })}
+                >
+                  {a}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {p && (
           <div className="detail-section">

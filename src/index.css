@@ -1392,3 +1392,28 @@ a {
   box-shadow: inset 0 0 0 2px var(--accent);
   color: var(--accent-dark);
 }
+.plan-pin circle {
+  filter: drop-shadow(0 2px 4px rgba(74, 63, 92, 0.25));
+}
+.mini-sub {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.iot-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.5px solid #4aa8e8;
+  background: #fff;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(74, 63, 92, 0.3);
+  cursor: pointer;
+  pointer-events: auto;
+  padding: 0;
+}
+.iot-pin-sel {
+  border-color: #ff6f91;
+}

@@ -82,6 +82,7 @@ export default function PlanCanvas() {
         .filter((it): it is InventoryItem & { placement: Placement } => !!it.placement)
         .sort(
           (a, b) =>
+            Number(a.category === 'iot') - Number(b.category === 'iot') ||
             (a.placement.z ?? 0) - (b.placement.z ?? 0) ||
             b.placement.w * b.placement.d - a.placement.w * a.placement.d,
         ),
@@ -425,6 +426,22 @@ export default function PlanCanvas() {
               const rad = (p.rot * Math.PI) / 180;
               const halfH = Math.abs((p.w / 2) * Math.sin(rad)) + Math.abs((p.d / 2) * Math.cos(rad));
               const halfW = Math.abs((p.w / 2) * Math.cos(rad)) + Math.abs((p.d / 2) * Math.sin(rad));
+              // IoT 기기는 실제 크기 대신 화면에 늘 보이는 핀으로
+              if (it.category === 'iot') {
+                return (
+                  <g key={it.id} data-item={it.id} transform={`translate(${p.x} ${p.y}) scale(${inv})`} className="plan-item plan-pin">
+                    <circle r={15} fill="#fff" stroke={sel ? '#ff6f91' : '#4aa8e8'} strokeWidth={sel ? 3.5 : 2.5} />
+                    <text className="plan-emoji" fontSize={15} y={1} textAnchor="middle" dominantBaseline="middle">
+                      {it.emoji}
+                    </text>
+                    {(sel || view.s > 0.9) && (
+                      <text className="plan-item-name" y={28} textAnchor="middle">
+                        {it.name}
+                      </text>
+                    )}
+                  </g>
+                );
+              }
               return (
                 <g key={it.id} data-item={it.id} transform={`translate(${p.x} ${p.y})`} className="plan-item">
                   <g transform={`rotate(${p.rot})`}>

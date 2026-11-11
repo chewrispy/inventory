@@ -8,6 +8,7 @@ export type Category =
   | 'electronics'
   | 'bathroom'
   | 'food'
+  | 'iot'
   | 'misc';
 
 export const CATEGORY_LABEL: Record<Category, string> = {
@@ -20,6 +21,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   electronics: '전자기기',
   bathroom: '욕실용품',
   food: '식품',
+  iot: 'IoT 기기',
   misc: '기타',
 };
 
@@ -87,6 +89,8 @@ export interface InventoryItem {
   color?: string;
   /** 작은 물건: 들어있는 가구 id 또는 방 id */
   locationId?: string;
+  /** IoT 기기: 연결 앱 (SmartThings, ThinQ, Google Home 등) */
+  iotApp?: string;
   /** 옷이면 옷장 정보 */
   clothing?: ClothingInfo;
 }
@@ -131,3 +135,5 @@ export interface ShoppingEntry {
   qty: number;
   addedAt: string;
 }
+
+export const IOT_APPS = ['SmartThings', 'LG ThinQ', 'Google Home', 'Apple 홈', 'Tapo', '헤이홈', '기타'] as const;

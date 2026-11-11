@@ -48,13 +48,16 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
   const openDetail = useInventoryStore((s) => s.openDetail);
   const openAddStuff = useInventoryStore((s) => s.openAddStuff);
   const [q, setQ] = useState('');
+  const [iotOnly, setIotOnly] = useState(false);
 
   const groups = useMemo(() => {
     const all = buildGroups(items, rooms);
     const scoped = roomId ? all.filter((g) => g.key === roomId) : all;
     const term = q.trim();
-    if (!term) return scoped;
-    const hit = (it: InventoryItem) => it.name.includes(term) || (it.memo ?? '').includes(term);
+    if (!term && !iotOnly) return scoped;
+    const hit = (it: InventoryItem) =>
+      (!iotOnly || it.category === 'iot') &&
+      (!term || it.name.includes(term) || (it.memo ?? '').includes(term) || (it.iotApp ?? '').includes(term));
     return scoped
       .map((g) => ({
         ...g,
@@ -64,9 +67,10 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
         loose: g.loose.filter(hit),
       }))
       .filter((g) => g.rows.length + g.loose.length > 0);
-  }, [items, rooms, roomId, q]);
+  }, [items, rooms, roomId, q, iotOnly]);
 
   const total = items.reduce((s, it) => s + (it.placement ? 0 : 1), 0);
+  const iotIds = new Set(items.filter((it) => it.category === 'iot').map((it) => it.id));
 
   return (
     <>
@@ -87,6 +91,14 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
+            <div className="chip-tabs">
+              <button className={!iotOnly ? 'active' : ''} onClick={() => setIotOnly(false)}>
+                전체
+              </button>
+              <button className={iotOnly ? 'active' : ''} onClick={() => setIotOnly(true)}>
+                📡 IoT 기기 {items.filter((it) => it.category === 'iot').length}
+              </button>
+            </div>
           </>
         )}
         {roomId && groups[0]?.sub && <p className="modal-note">{groups[0].sub}</p>}
@@ -102,7 +114,10 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
                     <span className="mini-swatch" style={{ background: item.color }}>
                       {item.emoji}
                     </span>
-                    <span className="mini-name">{item.name}</span>
+                    <span className="mini-name">
+                      {item.name}
+                      {iotIds.has(item.id) && item.iotApp && <small className="mini-sub"> · {item.iotApp}</small>}
+                    </span>
                     {children.length > 0 && <span className="mini-qty">📦 {children.length}</span>}
                   </button>
                   {children.length > 0 && (

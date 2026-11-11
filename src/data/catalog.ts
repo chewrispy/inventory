@@ -12,7 +12,7 @@ export interface CatalogEntry {
   color: string;
 }
 
-export type CatalogGroup = '가구' | '가전' | '문·창문';
+export type CatalogGroup = '가구' | '가전' | 'IoT' | '문·창문';
 
 export const CATALOG: Record<CatalogGroup, CatalogEntry[]> = {
   가구: [
@@ -49,6 +49,21 @@ export const CATALOG: Record<CatalogGroup, CatalogEntry[]> = {
     { key: 'styler', name: '의류관리기', emoji: '👔', category: 'appliance', w: 45, d: 60, h: 185, color: '#e4e4ea' },
     { key: 'robot', name: '로봇청소기', emoji: '🤖', category: 'appliance', w: 35, d: 35, h: 10, color: '#d9dce3' },
     { key: 'pc', name: '컴퓨터·모니터', emoji: '💻', category: 'electronics', w: 60, d: 25, h: 45, color: '#4a4a55' },
+  ],
+  IoT: [
+    { key: 'cam', name: '홈카메라', emoji: '📷', category: 'iot', w: 10, d: 10, h: 12, z: 80, color: '#dff3ff' },
+    { key: 'plug', name: '스마트플러그', emoji: '🔌', category: 'iot', w: 6, d: 6, h: 6, z: 30, color: '#dff3ff' },
+    { key: 'nesthub', name: '구글 홈 허브', emoji: '🖼️', category: 'iot', w: 18, d: 7, h: 12, z: 75, color: '#dff3ff' },
+    { key: 'speaker', name: 'AI 스피커', emoji: '🔊', category: 'iot', w: 10, d: 10, h: 10, z: 75, color: '#dff3ff' },
+    { key: 'bulb', name: '스마트 전구', emoji: '💡', category: 'iot', w: 8, d: 8, h: 10, z: 230, color: '#fff6c8' },
+    { key: 'switch', name: '스마트 스위치', emoji: '🎚️', category: 'iot', w: 8, d: 3, h: 12, z: 120, color: '#dff3ff' },
+    { key: 'lock', name: '도어락', emoji: '🔐', category: 'iot', w: 8, d: 8, h: 30, z: 90, color: '#dff3ff' },
+    { key: 'motion', name: '모션 센서', emoji: '👁️', category: 'iot', w: 5, d: 5, h: 5, z: 200, color: '#dff3ff' },
+    { key: 'door-sensor', name: '문열림 센서', emoji: '🧲', category: 'iot', w: 5, d: 3, h: 5, z: 150, color: '#dff3ff' },
+    { key: 'thermo', name: '온습도계', emoji: '🌡️', category: 'iot', w: 6, d: 3, h: 6, z: 120, color: '#dff3ff' },
+    { key: 'irremote', name: 'IR 리모컨 허브', emoji: '📡', category: 'iot', w: 8, d: 8, h: 4, z: 75, color: '#dff3ff' },
+    { key: 'hub', name: 'IoT 허브', emoji: '🔗', category: 'iot', w: 10, d: 10, h: 3, z: 75, color: '#dff3ff' },
+    { key: 'router', name: '공유기', emoji: '📶', category: 'iot', w: 25, d: 15, h: 5, z: 40, color: '#dff3ff' },
   ],
   '문·창문': [
     { key: 'door', name: '문', emoji: '🚪', category: 'misc', w: 90, d: 16, h: 210, color: '#d9b48c' },

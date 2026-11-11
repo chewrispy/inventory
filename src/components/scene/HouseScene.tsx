@@ -119,6 +119,18 @@ function Furniture({ item, placement: p }: { item: InventoryItem; placement: Pla
         <planeGeometry args={[icon, icon]} />
         <meshBasicMaterial map={texture} transparent depthWrite={false} />
       </mesh>
+      {item.category === 'iot' && (
+        // 작은 IoT 기기는 화면 크기가 일정한 핀으로 표시
+        <Html position={[0, h + 0.12, 0]} center zIndexRange={[8, 6]}>
+          <button
+            className={`iot-pin ${sel ? 'iot-pin-sel' : ''}`}
+            onClick={() => openDetail(item.id)}
+            aria-label={item.name}
+          >
+            {item.emoji}
+          </button>
+        </Html>
+      )}
       {hover && (
         <Html position={[0, h + 0.35, 0]} center distanceFactor={9}>
           <div className="hover-tag">{item.name}</div>
