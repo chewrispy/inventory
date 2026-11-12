@@ -15,6 +15,7 @@ import { CLOTH_COLORS } from '../../data/clothColors';
 import { roomAt } from '../../utils/geometry';
 import { loadPlanImage } from '../../utils/image';
 import { fetchProductInfo, guessClothType, thumbUrl } from '../../utils/productLink';
+import ClosetImport from './ClosetImport';
 
 interface Draft {
   id?: string;
@@ -93,6 +94,7 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
   const [draft, setDraft] = useState<Draft | null>(null);
   const [sold, setSold] = useState(false);
   const [fetching, setFetching] = useState<'idle' | 'loading' | 'fail'>('idle');
+  const [importing, setImporting] = useState(false);
 
   // 드레스룸 안에 놓인 가구(스타일러, 행거 등)
   const furniture = useMemo(
@@ -174,6 +176,8 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
     );
     setFetching(info.imageUrl ? 'idle' : 'fail');
   };
+
+  if (importing) return <ClosetImport roomId={room.id} onClose={() => setImporting(false)} />;
 
   if (draft) {
     const toggleSeason = (s: Season) =>
@@ -525,6 +529,9 @@ export default function ClosetSheet({ room, onClose }: { room: Room; onClose: ()
             onClick={() => setDraft(emptyDraft(room.id, type === '전체' ? '상의' : type, owner === '전체' ? undefined : owner))}
           >
             + 옷 추가
+          </button>
+          <button className="pixel-btn" onClick={() => setImporting(true)}>
+            📥 한꺼번에 가져오기
           </button>
         </div>
       </div>

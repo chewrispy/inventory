@@ -1553,3 +1553,70 @@ a {
   font-size: 13px;
   box-shadow: 0 2px 6px rgba(74, 63, 92, 0.25);
 }
+.import-pick {
+  align-self: flex-start;
+  cursor: pointer;
+}
+.import-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 1 !important;
+  overflow-y: auto;
+  max-height: 50vh;
+}
+.import-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.import-row input {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+}
+.import-dup {
+  opacity: 0.55;
+}
+.import-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #f4f0f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: none;
+  font-size: 22px;
+}
+.import-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.import-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.import-info b {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.import-info small {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.import-done {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  margin: 16px 0;
+}
