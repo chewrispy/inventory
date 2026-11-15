@@ -4,6 +4,7 @@ import { CATEGORY_LABEL, IOT_APPS, type Category, type Condition, type Inventory
 import { FURNITURE_COLORS } from '../../data/catalog';
 import { roomAt } from '../../utils/geometry';
 import DaangnModal from './DaangnModal';
+import ItemThumb from './ItemThumb';
 
 const CONDITIONS: Condition[] = ['새상품', '거의새것', '사용감있음', '많이사용함'];
 
@@ -75,9 +76,7 @@ export default function ItemDetailLayer() {
           ✕
         </button>
         <div className="detail-header">
-          <div className="detail-emoji" style={p ? { background: item.color } : undefined}>
-            {item.emoji}
-          </div>
+          <ItemThumb item={item} className="detail-emoji" />
           <div>
             <div className="detail-name">{item.name}</div>
             <div className="detail-tags">
@@ -85,7 +84,13 @@ export default function ItemDetailLayer() {
               <span className="tag">📍 {where}</span>
               {item.condition && <span className="tag">{item.condition}</span>}
               {item.iotApp && <span className="tag">📲 {item.iotApp}</span>}
+              {item.brand && <span className="tag">{item.brand}</span>}
             </div>
+            {(item.link ?? item.clothing?.link) && (
+              <a className="text-btn" href={item.link ?? item.clothing?.link} target="_blank" rel="noreferrer">
+                상품 페이지 열기 ↗
+              </a>
+            )}
           </div>
         </div>
 

@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { useInventoryStore } from '../../store/useInventoryStore';
 import type { InventoryItem, Room } from '../../types';
 import { formatArea, roomAt } from '../../utils/geometry';
+import ItemThumb from './ItemThumb';
+import InventoryImport from './InventoryImport';
 
 interface Group {
   key: string;
@@ -49,6 +51,7 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
   const openAddStuff = useInventoryStore((s) => s.openAddStuff);
   const [q, setQ] = useState('');
   const [iotOnly, setIotOnly] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const groups = useMemo(() => {
     const all = buildGroups(items, rooms);
@@ -71,6 +74,8 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
 
   const total = items.reduce((s, it) => s + (it.placement ? 0 : 1), 0);
   const iotIds = new Set(items.filter((it) => it.category === 'iot').map((it) => it.id));
+
+  if (importing) return <InventoryImport onClose={() => setImporting(false)} />;
 
   return (
     <>
@@ -111,9 +116,7 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
               {g.rows.map(({ item, children }) => (
                 <div key={item.id} className="inv-row-wrap">
                   <button className="mini-row" onClick={() => openDetail(item.id)}>
-                    <span className="mini-swatch" style={{ background: item.color }}>
-                      {item.emoji}
-                    </span>
+                    <ItemThumb item={item} />
                     <span className="mini-name">
                       {item.name}
                       {iotIds.has(item.id) && item.iotApp && <small className="mini-sub"> · {item.iotApp}</small>}
@@ -124,7 +127,7 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
                     <div className="inv-children">
                       {children.map((c) => (
                         <button key={c.id} className="mini-row mini-row-child" onClick={() => openDetail(c.id)}>
-                          <span>{c.emoji}</span>
+                          <ItemThumb item={c} className="mini-swatch mini-swatch-sm" />
                           <span className="mini-name">{c.name}</span>
                           <span className="mini-qty">×{c.quantity}</span>
                         </button>
@@ -135,7 +138,7 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
               ))}
               {g.loose.map((c) => (
                 <button key={c.id} className="mini-row" onClick={() => openDetail(c.id)}>
-                  <span className="mini-swatch">{c.emoji}</span>
+                  <ItemThumb item={c} />
                   <span className="mini-name">{c.name}</span>
                   <span className="mini-qty">×{c.quantity}</span>
                 </button>
@@ -152,6 +155,9 @@ export default function InventoryList({ roomId, onClose }: { roomId?: string; on
           <div className="detail-actions">
             <button className="pixel-btn pixel-btn-accent" onClick={() => openAddStuff('')}>
               + 물건 추가
+            </button>
+            <button className="pixel-btn" onClick={() => setImporting(true)}>
+              📥 한꺼번에 가져오기
             </button>
           </div>
         )}

@@ -91,6 +91,13 @@ export interface InventoryItem {
   color?: string;
   /** 작은 물건: 들어있는 가구 id 또는 방 id */
   locationId?: string;
+  /** 브랜드 (스타벅스, LG 등) */
+  brand?: string;
+  /** 물건 사진: 직접 찍은 사진(작게 줄인 dataURL) 또는 상품 이미지 주소 */
+  photo?: string;
+  imageUrl?: string;
+  /** 상품 페이지 링크 */
+  link?: string;
   /** IoT 기기: 연결 앱 (SmartThings, ThinQ, Google Home 등) */
   iotApp?: string;
   /** 옷이면 옷장 정보 */
