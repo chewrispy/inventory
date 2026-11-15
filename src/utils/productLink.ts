@@ -2,6 +2,7 @@
 import type { ClothType } from '../types';
 
 const TYPE_HINTS: [ClothType, RegExp][] = [
+  ['홈웨어', /잠옷|파자마|홈웨어|라운지|수면|pajama|pyjama|sleep|lounge/i],
   ['아우터', /자켓|재킷|점퍼|코트|패딩|블루종|바람막이|아노락|베스트|조끼|가디건|카디건|jacket|coat|parka|blazer|블레이저/i],
   ['원피스', /원피스|드레스|dress|점프수트/i],
   ['하의', /팬츠|바지|슬랙스|데님|진\b|청바지|스커트|치마|쇼츠|반바지|레깅스|조거|pants|jeans|skirt|shorts/i],

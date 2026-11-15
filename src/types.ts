@@ -97,7 +97,7 @@ export interface InventoryItem {
   clothing?: ClothingInfo;
 }
 
-export const CLOTH_TYPES = ['상의', '하의', '아우터', '원피스', '신발', '가방', '액세서리', '기타'] as const;
+export const CLOTH_TYPES = ['상의', '하의', '아우터', '원피스', '홈웨어', '신발', '가방', '액세서리', '기타'] as const;
 export type ClothType = (typeof CLOTH_TYPES)[number];
 export const SEASONS = ['봄', '여름', '가을', '겨울'] as const;
 export type Season = (typeof SEASONS)[number];
@@ -107,6 +107,7 @@ export const CLOTH_EMOJI: Record<ClothType, string> = {
   하의: '👖',
   아우터: '🧥',
   원피스: '👗',
+  홈웨어: '🌙',
   신발: '👟',
   가방: '👜',
   액세서리: '💍',
